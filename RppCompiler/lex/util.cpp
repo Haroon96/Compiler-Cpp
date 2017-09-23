@@ -13,5 +13,5 @@ bool isOperator(char c) {
 }
 
 bool isWhitespace(char c) {
-	return (c == ' ' || c == '\n');
+	return (c == ' ' || c == '\n' || c == '\t');
 }

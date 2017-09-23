@@ -10,7 +10,16 @@ namespace lex {
 	std::vector<TokenLexeme*> analyze(std::ifstream *file) {
 		std::vector<TokenLexeme*> tlpairs;
 
+		// TODO: Sort machines by priority
 		int(*machines[])(char, int&) = {
+			&if_stmt,
+			&else_stmt,
+			&while_stmt,
+			&return_stmt,
+			&print_stmt,
+			&get_stmt,
+			&int_t,
+			&char_t,
 			&numeric_constants,
 			&identifiers,
 			&literal_constant,
@@ -39,6 +48,12 @@ namespace lex {
 				// read next symbol
 				symbol = file->get();
 
+				if (symbol == '#') {
+					// discard comment
+					std::getline(*file, std::string());
+					symbol = file->get();
+				}
+
 				// feed symbol to all machines
 				for (int i = 0; i < total_machines && feed; ++i) {
 					
@@ -48,6 +63,11 @@ namespace lex {
 						feed = false;
 						acceptingMachine = i;
 					}
+				}
+
+				if (lexeme == "" && isWhitespace(symbol)) {
+					feed = false;
+					token = IGNORE;
 				}
 
 				if (feed) {
