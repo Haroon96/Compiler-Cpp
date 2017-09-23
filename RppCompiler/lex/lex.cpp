@@ -33,6 +33,11 @@ namespace lex {
 		
 		int token;
 
+
+		/*
+			TODO: buffer file input
+			maybe buffer one line at a time using getline
+		*/
 		while (!file->eof()) {
 
 			// reset all machine states to 0
@@ -49,7 +54,7 @@ namespace lex {
 				symbol = file->get();
 
 				if (symbol == '#') {
-					// discard comment
+					// discard comment by reading till newline
 					std::getline(*file, std::string());
 					symbol = file->get();
 				}
