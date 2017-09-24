@@ -17,6 +17,7 @@ namespace lex {
 			&while_stmt,
 			&return_stmt,
 			&print_stmt,
+			&def_stmt,
 			&get_stmt,
 			&int_t,
 			&char_t,
@@ -38,11 +39,72 @@ namespace lex {
 			TODO: buffer file input
 			maybe buffer one line at a time using getline
 		*/
+
+
+		std::string buffer;
+		int buffer_length;
+
 		while (!file->eof()) {
 
-			// reset all machine states to 0
-			memset(states, 0, total_machines * sizeof(int));
-			
+
+			std::getline(*file, buffer);
+			buffer_length = buffer.length();
+
+			int i = 0;
+			while (i < buffer_length) {
+
+				// reset all machine states to 0
+				memset(states, 0, total_machines * sizeof(int));
+				bool feed = true;
+				int acceptingMachine;
+				std::string lexeme = "";
+
+				char symbol;
+
+				while (feed && i <= buffer_length) {
+
+					symbol = buffer[i++];
+
+					for (int j = 0; j < total_machines && feed; ++j) {
+						if ((token = machines[j](symbol, states[j])) != INVALID) {
+							// stop feeding symbols and reset all machines
+							acceptingMachine = j;
+							feed = false;
+						}
+					}
+
+					if (lexeme == "" && isWhitespace(symbol)) {
+						feed = false;
+						token = IGNORE;
+					}
+
+					if (feed) {
+						lexeme += symbol;
+					}
+
+					if (feed && isWhitespace(symbol) && lexeme != "") {
+						feed = false;
+						token = UNKNOWN;
+					}
+				}
+
+				// tokens with IGNORE value are ignored
+				if (token != IGNORE) {
+					tlpairs.push_back(new TokenLexeme(token, lexeme));
+					if (!isWhitespace(symbol) && i < buffer_length) {
+						--i;
+					}
+				}
+
+				if (symbol == '#') {
+					// the rest of the buffer is commented out
+					// no need to parse it further
+					break;
+				}
+			}
+		}
+
+			/*
 			bool feed = true;
 			int acceptingMachine;
 			std::string lexeme = "";
@@ -96,7 +158,7 @@ namespace lex {
 			}
 
 		}
-
+		*/
 		delete[]states;
 		
 		return tlpairs;

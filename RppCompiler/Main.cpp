@@ -24,6 +24,7 @@ void test(std::vector<lex::TokenLexeme*> tlp) {
 		"RETURN_STATEMENT",
 		"PRINT_STATEMENT",
 		"GET_STATEMENT",
+		"DEF_STATEMENT",
 		"INT_TYPE",
 		"CHAR_TYPE",
 		"IGNORE",

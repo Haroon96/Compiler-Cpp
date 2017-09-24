@@ -16,6 +16,7 @@ namespace lex {
 	int return_stmt(char symbol, int &state);
 	int print_stmt(char symbol, int &state);
 	int get_stmt(char symbol, int &state);
+	int def_stmt(char symbol, int &state);
 	int int_t(char symbol, int &state);
 	int char_t(char symbol, int &state);
 }
