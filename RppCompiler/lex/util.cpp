@@ -15,3 +15,7 @@ bool isOperator(char c) {
 bool isWhitespace(char c) {
 	return (c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == -1);
 }
+
+bool isSubscript(char c) {
+	return c == '[' || c == ']';
+}

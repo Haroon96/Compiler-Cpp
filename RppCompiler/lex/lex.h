@@ -31,7 +31,10 @@ namespace lex {
 		L_BRACE,
 		R_BRACE,
 		L_SUBSCRIPT_OPERATOR,
-		R_SUBSCRIPT_OPERATOR
+		R_SUBSCRIPT_OPERATOR,
+		COMMA,
+		L_PARENTHESES,
+		R_PARENTHESES
 	};
 
 	struct TokenLexeme {
@@ -41,4 +44,5 @@ namespace lex {
 	};
 
 	std::vector<TokenLexeme*> analyze(std::ifstream *file);
+	std::vector<std::string> make_symbol_table(std::vector<TokenLexeme*>);
 }

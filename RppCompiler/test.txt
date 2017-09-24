@@ -1,3 +1,20 @@
-if a == 5 {
-	x[i] = x[i+1] + 10#COMMENT
-} 
+def SelectionSort(int[]num, int length)
+{
+	int i, j, first, temp 
+	i = length 
+	while I > 0
+	{
+		first = 0	# initialize to subscript of first element
+		j = 1
+		while j <= i	# locate smallest between positions 1 and i.
+		{
+			if  num[j] <num[first]
+			first = j
+			j = j + 1
+		}
+		temp = num[first]		# Swap smallest found with element in position i.
+		num[first] = num[i]
+		num[i] = temp
+		i = i - 1
+	}
+}

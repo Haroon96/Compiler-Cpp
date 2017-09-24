@@ -7,7 +7,7 @@ namespace lex {
 	int whitespace(char symbol, int &state);
 	int relational_operators(char symbol, int &state);
 	int literal_constant(char symbol, int &state);
-	int operators(char symbol, int &state);
+	int special_symbols(char symbol, int &state);
 
 	// TODO
 	int if_stmt(char symbol, int &state);

@@ -107,7 +107,7 @@ int lex::literal_constant(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::operators(char symbol, int & state) {
+int lex::special_symbols(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == '+') {
@@ -128,6 +128,12 @@ int lex::operators(char symbol, int & state) {
 			state = 8;
 		} else if (symbol == ']') {
 			state = 9;
+		} else if (symbol == ',') {
+			state = 10;
+		} else if (symbol == '(') {
+			state = 11;
+		} else if (symbol == ')') {
+			state = 12;
 		}
 		break;
 	case 1:
@@ -158,6 +164,12 @@ int lex::operators(char symbol, int & state) {
 		return L_SUBSCRIPT_OPERATOR;
 	case 9:
 		return R_SUBSCRIPT_OPERATOR;
+	case 10:
+		return COMMA;
+	case 11:
+		return L_PARENTHESES;
+	case 12:
+		return R_PARENTHESES;
 	}
 	return INVALID;
 }
@@ -460,7 +472,7 @@ int lex::int_t(char symbol, int & state) {
 		}
 		break;
 	case 3:
-		if (isWhitespace(symbol)) {
+		if (isWhitespace(symbol) || isSubscript(symbol)) {
 			return INT_TYPE;
 		}
 		break;
@@ -499,7 +511,7 @@ int lex::char_t(char symbol, int & state) {
 		}
 		break;
 	case 4:
-		if (isWhitespace(symbol)) {
+		if (isWhitespace(symbol) || isSubscript(symbol)) {
 			return CHAR_TYPE;
 		}
 		break;

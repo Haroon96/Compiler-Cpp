@@ -31,7 +31,10 @@ void test(std::vector<lex::TokenLexeme*> tlp) {
 		"L_BRACE",
 		"R_BRACE",
 		"L_SUBSCRIPT_OPERATOR",
-		"R_SUBSCRIPT_OPERATOR"
+		"R_SUBSCRIPT_OPERATOR",
+		"COMMA",
+		"L_PARENTHESES",
+		"R_PARENTHESES"
 	};
 
 
@@ -61,7 +64,26 @@ int main(int argc, char *argv[]) {
 
 	std::vector<lex::TokenLexeme*> tlp = lex::analyze(&src);
 
-	test(tlp);
+
+	for (int j = 0; j < tlp.size(); ++j) {
+		if (tlp[j]->token == lex::IDENTIFIER) {
+			cout << tlp[j]->lexeme << endl;
+		}
+	}
+
+	std::vector<std::string> ids = lex::make_symbol_table(tlp);
+
+	for (int i = 0; i < ids.size(); ++i) {
+		cout << i << " " << ids[i] << endl;
+	}
+
+	for (int j = 0; j < tlp.size(); ++j) {
+		if (tlp[j]->token == lex::IDENTIFIER) {
+			cout << tlp[j]->lexeme << endl;
+		}
+	}
+
+//	test(tlp);
 
 	src.close();
 	return 0;
