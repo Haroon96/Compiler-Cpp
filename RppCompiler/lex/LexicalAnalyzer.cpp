@@ -1,4 +1,5 @@
 #include <vector>
+#include <cstring>
 #include "LexicalAnalyzer.h"
 #include "automata.h"
 #include "util.h"
@@ -41,6 +42,7 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 
 	TokenLexeme *tokenLexeme = nullptr;
 
+	std::string dump;
 	// while not eof and a valid token isn't found
 	while (!file->eof() && tokenLexeme == nullptr) {
 
@@ -92,7 +94,7 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 			// rest of the line is commented out so skip it
 			if (feed && symbol == '#') {
 				feed = false;
-				std::getline(*file, std::string());
+				std::getline(*file, dump);
 				token = IGNORE;
 			}
 
