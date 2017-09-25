@@ -41,11 +41,13 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 
 	TokenLexeme *tokenLexeme = nullptr;
 
+	// while not eof and a valid token isn't found
 	while (!file->eof() && tokenLexeme == nullptr) {
 
 		// reset all machine states to 0
 		memset(states, 0, totalAutomata * sizeof(int));
 
+		// to indicate if next symbol is to be fed to all machines
 		bool feed = true;
 		char symbol;
 
@@ -54,36 +56,38 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 			// read next symbol
 			symbol = file->get();
 
-			if (symbol == '#') {
-				// discard comment by reading till newline
-				std::getline(*file, std::string());
-				symbol = file->get();
-			}
 
-			// feed symbol to all machines
+			// feed symbol to all automata
 			for (int i = 0; i < totalAutomata && feed; ++i) {
 
+				// check if an automaton accepts the string
 				if ((token = automata[i](symbol, states[i])) != INVALID) {
-					// a high-priority machine reached an accepting state
-					// suspend and save token-lexeme pair
+					// stop feeding symbols and set flag
 					feed = false;
 				}
 			}
 
+			// encountered a whitespace. ignore it and reset.
 			if (lexeme == "" && isWhitespace(symbol)) {
 				feed = false;
 				token = IGNORE;
 			}
 
+			// lexeme was not accepted by any machine yet
+			// append symbol to lexeme and continue feeding
 			if (feed) {
 				lexeme += symbol;
 			}
 
+			// an unrecognized lexeme was encountered
+			// mark it as unknown and reset
 			if (feed && (isWhitespace(symbol) || file->eof()) && lexeme != "") {
 				feed = false;
 				token = UNKNOWN;
 			}
-			
+
+			// a comment was encountered
+			// rest of the line is commented out so skip it
 			if (feed && symbol == '#') {
 				feed = false;
 				std::getline(*file, std::string());
@@ -92,21 +96,27 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 
 		}
 
-		// tokens with IGNORE value are ignored
+		// do not save ignored tokens (whitespaces)
 		if (token != IGNORE) {
 			if (!file->eof() && !isWhitespace(symbol)) {
 				// seek backwards
 				file->seekg(-1, std::ios_base::cur);
 			}
+			// if lexeme is an identifier
 			if (token == IDENTIFIER) {
+				// locate in symbol table
 				int index = findId(lexeme);
+
+				// if found, reference it
 				if (index >= 0) {
 					lexeme = std::to_string(index);
 				} else {
+					// else add it to symbol table
 					idTbl->push_back(lexeme);
 					lexeme = std::to_string(idTbl->size() - 1);
 				}
 			}
+			// set token-lexeme variable to end loop
 			tokenLexeme = new TokenLexeme(token, lexeme);
 		}
 
