@@ -1,50 +1,63 @@
 #include <iostream>
-#include "lex/lex.h"
+#include "lex/LexicalAnalyzer.h"
 using namespace std;
 
 
-void test(std::vector<lex::TokenLexeme*> tlp) {
+
+char *values[] = {
+	"INVALID",
+	"NUMERIC_CONSTANT",
+	"IDENTIFIER",
+	"RELATIONAL_OPERATOR",
+	"UNKNOWN",
+	"LITERAL_CONSTANT",
+	"ADDITION_OPERATOR",
+	"SUBTRACTION_OPERATOR",
+	"MULTIPLICATION_OPERATOR",
+	"DIVISION_OPERATOR",
+	"ASSIGNMENT_OPERATOR",
+	"IF_STATEMENT",
+	"ELSE_STATEMENT",
+	"WHILE_STATEMENT",
+	"RETURN_STATEMENT",
+	"PRINT_STATEMENT",
+	"GET_STATEMENT",
+	"DEF_STATEMENT",
+	"INT_TYPE",
+	"CHAR_TYPE",
+	"IGNORE",
+	"L_BRACE",
+	"R_BRACE",
+	"L_SUBSCRIPT_OPERATOR",
+	"R_SUBSCRIPT_OPERATOR",
+	"COMMA",
+	"L_PARENTHESES",
+	"R_PARENTHESES"
+};
 
 
-	char *values[] = { 
-		"INVALID",
-		"NUMERIC_CONSTANT",
-		"IDENTIFIER",
-		"RELATIONAL_OPERATOR",
-		"UNKNOWN",
-		"LITERAL_CONSTANT",
-		"ADDITION_OPERATOR",
-		"SUBTRACTION_OPERATOR",
-		"MULTIPLICATION_OPERATOR",
-		"DIVISION_OPERATOR",
-		"ASSIGNMENT_OPERATOR",
-		"IF_STATEMENT",
-		"ELSE_STATEMENT",
-		"WHILE_STATEMENT",
-		"RETURN_STATEMENT",
-		"PRINT_STATEMENT",
-		"GET_STATEMENT",
-		"DEF_STATEMENT",
-		"INT_TYPE",
-		"CHAR_TYPE",
-		"IGNORE",
-		"L_BRACE",
-		"R_BRACE",
-		"L_SUBSCRIPT_OPERATOR",
-		"R_SUBSCRIPT_OPERATOR",
-		"COMMA",
-		"L_PARENTHESES",
-		"R_PARENTHESES"
-	};
+void write(LexicalAnalyzer &lex) {
+	ofstream words("words.txt");
 
 
-	for (int i = 0; i < tlp.size(); ++i) {
-		cout << "\t";
-		cout << tlp[i]->lexeme << "\t\t";
-		cout << values[tlp[i]->token - 300] << endl;
+	while (lex.hasNextToken()) {
+		TokenLexeme* tl = lex.nextToken();
+		words << tl->lexeme << "\t\t";
+		words << values[tl->token - 300] << endl;
 	}
 
+
+	words.close();
+
+	ofstream table("table.txt");
+
+	for (std::vector<std::string>::iterator start = lex.getIdTblStart(), end = lex.getIdTblEnd(); start != end; ++start) {
+		table << *start << endl;
+	}
+
+	table.close();
 }
+
 
 int main(int argc, char *argv[]) {
 	/*
@@ -62,29 +75,21 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	std::vector<lex::TokenLexeme*> tlp = lex::analyze(&src);
+	LexicalAnalyzer lex(&src);
 
+	write(lex);
 
-	for (int j = 0; j < tlp.size(); ++j) {
-		if (tlp[j]->token == lex::IDENTIFIER) {
-			cout << tlp[j]->lexeme << endl;
+	while (lex.hasNextToken()) {
+		TokenLexeme* tl = lex.nextToken();
+
+		cout << "\t";
+		if (tl->token == IDENTIFIER) {
+			cout << lex.getId(tl->lexeme) << "\t\t";
+		} else {
+			cout << tl->lexeme << "\t\t";
 		}
+		cout << values[tl->token - 300] << endl;
 	}
-
-	std::vector<std::string> ids = lex::make_symbol_table(tlp);
-
-	for (int i = 0; i < ids.size(); ++i) {
-		cout << i << " " << ids[i] << endl;
-	}
-
-	for (int j = 0; j < tlp.size(); ++j) {
-		if (tlp[j]->token == lex::IDENTIFIER) {
-			cout << tlp[j]->lexeme << endl;
-		}
-	}
-
-//	test(tlp);
-
 	src.close();
 	return 0;
 }

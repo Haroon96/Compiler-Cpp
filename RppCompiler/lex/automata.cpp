@@ -1,8 +1,8 @@
 #include "automata.h"
 #include "util.h"
-#include "lex.h"
+#include "LexicalAnalyzer.h"
 
-int lex::numeric_constants(char symbol, int & state) {
+int automata::numeric_constants(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (isDigit(symbol)) {
@@ -19,7 +19,7 @@ int lex::numeric_constants(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::identifiers(char symbol, int & state) {
+int automata::identifiers(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (isLetter(symbol)) {
@@ -38,7 +38,7 @@ int lex::identifiers(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::whitespace(char symbol, int & state) {
+int automata::whitespace(char symbol, int & state) {
 	if (isWhitespace(symbol)) {
 		return IGNORE;
 	} else {
@@ -46,7 +46,7 @@ int lex::whitespace(char symbol, int & state) {
 	}
 }
 
-int lex::relational_operators(char symbol, int & state) {
+int automata::relational_operators(char symbol, int & state) {
 	// < > <= >= ==
 
 	switch (state) {
@@ -79,7 +79,7 @@ int lex::relational_operators(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::literal_constant(char symbol, int & state) {
+int automata::literal_constant(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == '\'') {
@@ -107,7 +107,7 @@ int lex::literal_constant(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::special_symbols(char symbol, int & state) {
+int automata::special_symbols(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == '+') {
@@ -175,7 +175,7 @@ int lex::special_symbols(char symbol, int & state) {
 }
 
 
-int lex::if_stmt(char symbol, int & state) {
+int automata::if_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'i') {
@@ -200,7 +200,7 @@ int lex::if_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::else_stmt(char symbol, int & state) {
+int automata::else_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'e') {
@@ -239,7 +239,7 @@ int lex::else_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::while_stmt(char symbol, int & state) {
+int automata::while_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'w') {
@@ -285,7 +285,7 @@ int lex::while_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::return_stmt(char symbol, int & state) {
+int automata::return_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'r') {
@@ -338,7 +338,7 @@ int lex::return_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::print_stmt(char symbol, int & state) {
+int automata::print_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'p') {
@@ -384,7 +384,7 @@ int lex::print_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::get_stmt(char symbol, int & state) {
+int automata::get_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'g') {
@@ -416,7 +416,7 @@ int lex::get_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::def_stmt(char symbol, int & state) {
+int automata::def_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'd') {
@@ -448,7 +448,7 @@ int lex::def_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::int_t(char symbol, int & state) {
+int automata::int_t(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'i') {
@@ -480,7 +480,7 @@ int lex::int_t(char symbol, int & state) {
 	return INVALID;
 }
 
-int lex::char_t(char symbol, int & state) {
+int automata::char_t(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'c') {

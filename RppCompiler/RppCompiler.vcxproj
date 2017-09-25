@@ -20,13 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lex\automata.cpp" />
-    <ClCompile Include="lex\lex.cpp" />
+    <ClCompile Include="lex\LexicalAnalyzer.cpp" />
     <ClCompile Include="lex\util.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="compiler.h" />
     <ClInclude Include="lex\automata.h" />
-    <ClInclude Include="lex\lex.h" />
+    <ClInclude Include="lex\LexicalAnalyzer.h" />
     <ClInclude Include="lex\util.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

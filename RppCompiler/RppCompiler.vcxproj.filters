@@ -18,25 +18,28 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lex\lex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="lex\automata.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="lex\util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lex\LexicalAnalyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lex\lex.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="lex\automata.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="lex\util.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lex\LexicalAnalyzer.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

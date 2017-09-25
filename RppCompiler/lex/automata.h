@@ -1,6 +1,6 @@
 #pragma once
 
-namespace lex {
+namespace automata {
 	
 	int numeric_constants(char symbol, int& state);
 	int identifiers(char symbol, int &state);
