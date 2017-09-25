@@ -37,12 +37,14 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 
 	// to store token and lexeme
 	int token = INVALID;
-	std::string lexeme = "";
+	std::string lexeme;
 
 	TokenLexeme *tokenLexeme = nullptr;
 
 	// while not eof and a valid token isn't found
 	while (!file->eof() && tokenLexeme == nullptr) {
+
+		lexeme = "";
 
 		// reset all machine states to 0
 		memset(states, 0, totalAutomata * sizeof(int));

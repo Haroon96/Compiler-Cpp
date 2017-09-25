@@ -42,8 +42,10 @@ void write(LexicalAnalyzer &lex) {
 
 	while (lex.hasNextToken()) {
 		TokenLexeme* tl = lex.nextToken();
-		words << tl->lexeme << "\t\t";
-		words << lookup[tl->token - 300] << endl;
+		if (tl != nullptr) {
+			words << tl->lexeme << "\t\t";
+			words << lookup[tl->token - 300] << endl;
+		}
 	}
 
 
@@ -60,15 +62,13 @@ void write(LexicalAnalyzer &lex) {
 
 
 int main(int argc, char *argv[]) {
-	/*
+
 	if (argc < 2) {
 		cerr << "Source file name not specified" << endl;
 		return 1;
 	}
 
-	ifstream src(argv[1]);*/
-
-	ifstream src("test.txt");
+	ifstream src(argv[1]);
 
 	if (!src.is_open()) {
 		cerr << "Invalid source file name specified" << endl;
