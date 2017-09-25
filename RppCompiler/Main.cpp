@@ -4,7 +4,7 @@ using namespace std;
 
 
 
-std::string lookup[] = {
+char *lookup[] = {
 	"INVALID",
 	"NUMERIC_CONSTANT",
 	"IDENTIFIER",
