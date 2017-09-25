@@ -4,7 +4,7 @@ using namespace std;
 
 
 
-char *values[] = {
+char *lookup[] = {
 	"INVALID",
 	"NUMERIC_CONSTANT",
 	"IDENTIFIER",
@@ -43,7 +43,7 @@ void write(LexicalAnalyzer &lex) {
 	while (lex.hasNextToken()) {
 		TokenLexeme* tl = lex.nextToken();
 		words << tl->lexeme << "\t\t";
-		words << values[tl->token - 300] << endl;
+		words << lookup[tl->token - 300] << endl;
 	}
 
 
@@ -79,17 +79,6 @@ int main(int argc, char *argv[]) {
 
 	write(lex);
 
-	while (lex.hasNextToken()) {
-		TokenLexeme* tl = lex.nextToken();
-
-		cout << "\t";
-		if (tl->token == IDENTIFIER) {
-			cout << lex.getId(tl->lexeme) << "\t\t";
-		} else {
-			cout << tl->lexeme << "\t\t";
-		}
-		cout << values[tl->token - 300] << endl;
-	}
 	src.close();
 	return 0;
 }

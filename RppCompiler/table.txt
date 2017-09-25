@@ -1,8 +1,1 @@
-SelectionSort
-num
-length
-i
-j
-first
-temp
-I
+d
