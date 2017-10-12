@@ -1,8 +1,8 @@
 #include "automata.h"
 #include "util.h"
-#include "LexicalAnalyzer.h"
+#include "../compiler.h"
 
-int automata::numeric_constants(char symbol, int & state) {
+Token automata::numeric_constants(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (isDigit(symbol)) {
@@ -19,7 +19,7 @@ int automata::numeric_constants(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::identifiers(char symbol, int & state) {
+Token automata::identifiers(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (isLetter(symbol)) {
@@ -38,7 +38,7 @@ int automata::identifiers(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::whitespace(char symbol, int & state) {
+Token automata::whitespace(char symbol, int & state) {
 	if (isWhitespace(symbol)) {
 		return IGNORE;
 	} else {
@@ -46,7 +46,7 @@ int automata::whitespace(char symbol, int & state) {
 	}
 }
 
-int automata::relational_operators(char symbol, int & state) {
+Token automata::relational_operators(char symbol, int & state) {
 	// < > <= >= ==
 
 	switch (state) {
@@ -79,7 +79,7 @@ int automata::relational_operators(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::literal_constant(char symbol, int & state) {
+Token automata::literal_constant(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == '\'') {
@@ -107,7 +107,7 @@ int automata::literal_constant(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::special_symbols(char symbol, int & state) {
+Token automata::special_symbols(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == '+') {
@@ -175,7 +175,7 @@ int automata::special_symbols(char symbol, int & state) {
 }
 
 
-int automata::if_stmt(char symbol, int & state) {
+Token automata::if_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'i') {
@@ -200,7 +200,7 @@ int automata::if_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::else_stmt(char symbol, int & state) {
+Token automata::else_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'e') {
@@ -239,7 +239,7 @@ int automata::else_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::while_stmt(char symbol, int & state) {
+Token automata::while_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'w') {
@@ -285,7 +285,7 @@ int automata::while_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::return_stmt(char symbol, int & state) {
+Token automata::return_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'r') {
@@ -338,7 +338,7 @@ int automata::return_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::print_stmt(char symbol, int & state) {
+Token automata::print_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'p') {
@@ -384,7 +384,7 @@ int automata::print_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::get_stmt(char symbol, int & state) {
+Token automata::get_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'g') {
@@ -416,7 +416,7 @@ int automata::get_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::def_stmt(char symbol, int & state) {
+Token automata::def_stmt(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'd') {
@@ -448,7 +448,7 @@ int automata::def_stmt(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::int_t(char symbol, int & state) {
+Token automata::int_t(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'i') {
@@ -480,7 +480,7 @@ int automata::int_t(char symbol, int & state) {
 	return INVALID;
 }
 
-int automata::char_t(char symbol, int & state) {
+Token automata::char_t(char symbol, int & state) {
 	switch (state) {
 	case 0:
 		if (symbol == 'c') {

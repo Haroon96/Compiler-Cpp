@@ -1,18 +1,19 @@
-#include <vector>
 #include "LexicalAnalyzer.h"
 #include "automata.h"
 #include "util.h"
+#include "../compiler.h"
 
 LexicalAnalyzer::LexicalAnalyzer(std::ifstream * file) {
 	this->file = file;
 	this->idTbl = new std::vector<std::string>();
+	this->lineNumber = 1;
 }
 
 TokenLexeme* LexicalAnalyzer::nextToken() {
 
 	// pointers to automaton methods
 	// sorted by descending priority
-	int(*automata[])(char, int&) = {
+	Token(*automata[])(char, int&) = {
 		&automata::if_stmt,
 		&automata::else_stmt,
 		&automata::while_stmt,
@@ -36,7 +37,7 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 	int *states = new int[totalAutomata];
 
 	// to store token and lexeme
-	int token = INVALID;
+	Token token = INVALID;
 	std::string lexeme;
 
 	TokenLexeme *tokenLexeme = nullptr;
@@ -58,6 +59,10 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 			// read next symbol
 			symbol = file->get();
 
+			// update line number
+			if (symbol == '\n') {
+				lineNumber++;
+			}
 
 			// feed symbol to all automata
 			for (int i = 0; i < totalAutomata && feed; ++i) {
@@ -140,6 +145,9 @@ std::vector<std::string>::iterator LexicalAnalyzer::getIdTblStart() {
 }
 std::vector<std::string>::iterator LexicalAnalyzer::getIdTblEnd() {
 	return idTbl->end();
+}
+int LexicalAnalyzer::getLineNumber() {
+	return lineNumber;
 }
 int LexicalAnalyzer::findId(std::string id) {
 	int size = idTbl->size();

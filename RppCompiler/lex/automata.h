@@ -1,20 +1,22 @@
 #pragma once
 
+enum Token;
+
 namespace automata {
 	
-	int numeric_constants(char symbol, int& state);
-	int identifiers(char symbol, int &state);
-	int whitespace(char symbol, int &state);
-	int relational_operators(char symbol, int &state);
-	int literal_constant(char symbol, int &state);
-	int special_symbols(char symbol, int &state);
-	int if_stmt(char symbol, int &state);
-	int else_stmt(char symbol, int &state);
-	int while_stmt(char symbol, int &state);
-	int return_stmt(char symbol, int &state);
-	int print_stmt(char symbol, int &state);
-	int get_stmt(char symbol, int &state);
-	int def_stmt(char symbol, int &state);
-	int int_t(char symbol, int &state);
-	int char_t(char symbol, int &state);
+	Token numeric_constants(char symbol, int& state);
+	Token identifiers(char symbol, int &state);
+	Token whitespace(char symbol, int &state);
+	Token relational_operators(char symbol, int &state);
+	Token literal_constant(char symbol, int &state);
+	Token special_symbols(char symbol, int &state);
+	Token if_stmt(char symbol, int &state);
+	Token else_stmt(char symbol, int &state);
+	Token while_stmt(char symbol, int &state);
+	Token return_stmt(char symbol, int &state);
+	Token print_stmt(char symbol, int &state);
+	Token get_stmt(char symbol, int &state);
+	Token def_stmt(char symbol, int &state);
+	Token int_t(char symbol, int &state);
+	Token char_t(char symbol, int &state);
 }

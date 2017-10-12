@@ -32,10 +32,10 @@ enum Token {
 	L_PARENTHESES,
 	R_PARENTHESES
 };
-
+std::string getTokenName(Token t);
 
 struct TokenLexeme {
-	int token;
+	Token token;
 	std::string lexeme;
-	TokenLexeme(int token, std::string lexeme) : token(token), lexeme(lexeme) {}
+	TokenLexeme(Token token, std::string lexeme) : token(token), lexeme(lexeme) {}
 };
