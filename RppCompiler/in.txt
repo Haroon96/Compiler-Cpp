@@ -1,2 +1,3 @@
-
-def int
+def foo(int x, int y) {
+	int a = b + c
+}

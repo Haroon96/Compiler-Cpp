@@ -33,8 +33,10 @@ int main(int argc, char *argv[]) {
 
 		syntax->parse();
 
+		cout << syntax->getStream()->str() << endl;
+
 	} catch (exception &e) {
-		cerr << "An error occured on line " << lex->getLineNumber() << endl;
+		cerr << "Error encountered on line " << lex->getLineNumber() << endl;
 		cerr << "Details: " << e.what() << endl;
 	}
 
