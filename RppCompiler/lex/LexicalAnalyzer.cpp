@@ -55,7 +55,6 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 		char symbol;
 
 		while (feed) {
-
 			// read next symbol
 			symbol = file->get();
 
@@ -110,6 +109,8 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 				file->seekg(-1, std::ios_base::cur);
 			}
 			// if lexeme is an identifier
+			/*
+			******************** uncomment this code to enable identifier references
 			if (token == IDENTIFIER) {
 				// locate in symbol table
 				int index = findId(lexeme);
@@ -123,6 +124,7 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 					lexeme = std::to_string(idTbl->size() - 1);
 				}
 			}
+			*/
 			// set token-lexeme variable to end loop
 			tokenLexeme = new TokenLexeme(token, lexeme);
 		}

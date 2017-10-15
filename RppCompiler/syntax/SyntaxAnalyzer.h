@@ -30,6 +30,9 @@ private:
 	void pad(std::string);
 	bool match(Token);
 
+	void increase_depth();
+	void decrease_depth();
+
 	// grammar implementations
 	// may throw exceptions
 	void start();

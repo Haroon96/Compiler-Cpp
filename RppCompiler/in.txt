@@ -1,3 +1,6 @@
-def foo(int x, int y) {
+int a = 5
+def foo(int x, int y)
+{
 	int a = b + c
+	char c = 'a'
 }

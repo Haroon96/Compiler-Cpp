@@ -1,4 +1,4 @@
-#include "SyntaxAnalyzer.h"
+﻿#include "SyntaxAnalyzer.h"
 #include "../compiler.h"
 
 int SyntaxAnalyzer::getLineNumber() {
@@ -11,8 +11,9 @@ void SyntaxAnalyzer::parse() {
 	lookahead = lex->nextToken();
 
 	if (lookahead == nullptr) {
-		throw std::exception("An error while parsing file. No tokens found.");
+		throw std::exception("An error occured while parsing the file. No tokens found.");
 	}
+	pad("Global declaration list");
 	while (lex->hasNextToken()) {
 		start();
 	}
@@ -23,54 +24,76 @@ std::ostringstream* SyntaxAnalyzer::getStream() {
 }
 
 void SyntaxAnalyzer::pad(std::string name) {
-	*stream << name << std::endl;
 	for (int i = 0; i < depth; ++i) {
-		*stream << "|---";
+		*stream << "|--- ";
 	}
+	*stream << name << std::endl;
 }
 
 bool SyntaxAnalyzer::match(Token token) {
 	if (lookahead->token != token) {
 		throw std::exception(std::string("Expected " + getTokenName(token) + " but encountered " + getTokenName(lookahead->token) + " instead").c_str());
 	}
+	pad(lookahead->lexeme);
 	lookahead = lex->nextToken();
 	return true;
 }
 
+void SyntaxAnalyzer::increase_depth() {
+	depth++;
+}
+
+void SyntaxAnalyzer::decrease_depth() {
+	depth--;
+}
+
 void SyntaxAnalyzer::start() {
+	increase_depth();
 	if (lookahead->token == DEF_STATEMENT) {
+		pad("Function declaration");
 		function_declaration();
 	} else if (lookahead->token == INT_TYPE || lookahead->token == CHAR_TYPE) {
+		pad("Variable declaration");
 		variable_declaration();
 	} else {
 		throw std::exception("Expected variable or function declaration");
 	}
+	decrease_depth();
 }
 
 void SyntaxAnalyzer::function_declaration() {
-	pad("Function");
+	increase_depth();
 	match(DEF_STATEMENT);
 	match(IDENTIFIER);
 	match(L_PARENTHESES);
+	
+	pad("Parameters");
 	parameters();
+	
 	match(R_PARENTHESES);
 	match(L_BRACE);
 	statements();
 	match(R_BRACE);
+	decrease_depth();
 }
 
 void SyntaxAnalyzer::parameters() {
+	increase_depth();
 	if (lookahead->token != R_PARENTHESES) {
 		variable_declaration();
 		additional_parameters();
 	}
+	decrease_depth();
 }
 
 void SyntaxAnalyzer::variable_declaration() {
-	pad("Variable");
+	increase_depth();
+
 	data_type();
 	match(IDENTIFIER);
 	variable_initialization();
+
+	decrease_depth();
 }
 
 void SyntaxAnalyzer::variable_initialization() {
@@ -98,13 +121,17 @@ void SyntaxAnalyzer::additional_parameters() {
 }
 
 void SyntaxAnalyzer::statements() {
+	pad("Statement list");
+	increase_depth();
 	while (lookahead->token != R_BRACE) {
 		statement();
 	}
+	decrease_depth();
 }
 
 void SyntaxAnalyzer::statement() {
-
+	pad("Statement");
+	increase_depth();
 	switch (lookahead->token) {
 	case PRINT_STATEMENT:
 		print_statement();
@@ -132,6 +159,7 @@ void SyntaxAnalyzer::statement() {
 		throw std::exception("Unrecognized start of statement");
 		break;
 	}
+	decrease_depth();
 }
 
 void SyntaxAnalyzer::print_statement() {
@@ -178,8 +206,11 @@ void SyntaxAnalyzer::while_statement() {
 	}
 }
 void SyntaxAnalyzer::return_statement() {
+	pad("Return statement");
+	increase_depth();
 	match(RETURN_STATEMENT);
 	expression();
+	decrease_depth();
 }
 void SyntaxAnalyzer::identifier_prefix_statements() {
 	match(IDENTIFIER);
@@ -190,19 +221,30 @@ void SyntaxAnalyzer::identifier_prefix_statements() {
 	}
 }
 void SyntaxAnalyzer::method_call() {
+	pad("Method call");
+	increase_depth();
 	match(L_PARENTHESES);
 	expression();
 	match(R_PARENTHESES);
+	decrease_depth();
 }
 void SyntaxAnalyzer::assignment() {
+	pad("Assignment");
+	increase_depth();
 	match(ASSIGNMENT_OPERATOR);
 	expression();
+	decrease_depth();
 }
 void SyntaxAnalyzer::expression() {
+	pad("Expression");
+	increase_depth();
 	term();
 	expression_p();
+	decrease_depth();
 }
 void SyntaxAnalyzer::expression_p() {
+	pad("Expression'");
+	increase_depth();
 	if (lookahead->token == ADDITION_OPERATOR) {
 		match(ADDITION_OPERATOR);
 		term();
@@ -210,12 +252,18 @@ void SyntaxAnalyzer::expression_p() {
 		match(SUBTRACTION_OPERATOR);
 		expression_p();
 	}
+	decrease_depth();
 }
 void SyntaxAnalyzer::term() {
+	pad("Term");
+	increase_depth();
 	factor();
 	term_p();
+	decrease_depth();
 }
 void SyntaxAnalyzer::term_p() {
+	pad("Term'");
+	increase_depth();
 	if (lookahead->token == MULTIPLICATION_OPERATOR) {
 		match(MULTIPLICATION_OPERATOR);
 		factor();
@@ -225,8 +273,11 @@ void SyntaxAnalyzer::term_p() {
 		factor();
 		term_p();
 	}
+	decrease_depth();
 }
 void SyntaxAnalyzer::factor() {
+	pad("Factor");
+	increase_depth();
 	if (lookahead->token == IDENTIFIER) {
 		identifier_prefix_statements();
 	} else if (lookahead->token == NUMERIC_CONSTANT) {
@@ -235,7 +286,12 @@ void SyntaxAnalyzer::factor() {
 		match(L_PARENTHESES);
 		expression();
 		match(R_PARENTHESES);
+	} else if (lookahead->token == LITERAL_CONSTANT) {
+		match(LITERAL_CONSTANT);
+	} else {
+		throw std::exception("Invalid expression");
 	}
+	decrease_depth();
 }
 void SyntaxAnalyzer::data_element() {
 	if (lookahead->token == LITERAL_CONSTANT) {
