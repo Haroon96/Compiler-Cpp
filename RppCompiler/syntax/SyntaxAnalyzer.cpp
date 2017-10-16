@@ -25,7 +25,7 @@ std::ostringstream* SyntaxAnalyzer::getStream() {
 
 void SyntaxAnalyzer::pad(std::string name) {
 	for (int i = 0; i < depth; ++i) {
-		*stream << "|--- ";
+		*stream << "|---";
 	}
 	*stream << name << std::endl;
 }
@@ -68,7 +68,9 @@ void SyntaxAnalyzer::function_declaration() {
 	match(L_PARENTHESES);
 	
 	pad("Parameters");
+	increase_depth();
 	parameters();
+	decrease_depth();
 	
 	match(R_PARENTHESES);
 	match(L_BRACE);
@@ -78,12 +80,11 @@ void SyntaxAnalyzer::function_declaration() {
 }
 
 void SyntaxAnalyzer::parameters() {
-	increase_depth();
 	if (lookahead->token != R_PARENTHESES) {
+		pad("Parameter");
 		variable_declaration();
 		additional_parameters();
 	}
-	decrease_depth();
 }
 
 void SyntaxAnalyzer::variable_declaration() {
@@ -163,14 +164,22 @@ void SyntaxAnalyzer::statement() {
 }
 
 void SyntaxAnalyzer::print_statement() {
+	pad("Print statement");
+	increase_depth();
 	match(PRINT_STATEMENT);
 	data_element();
+	decrease_depth();
 }
 void SyntaxAnalyzer::get_statement() {
+	pad("Get statement");
+	increase_depth();
 	match(GET_STATEMENT);
 	match(IDENTIFIER);
+	decrease_depth();
 }
 void SyntaxAnalyzer::if_statement() {
+	pad("IF statement");
+	increase_depth();
 	match(IF_STATEMENT);
 	boolean_expression();
 	if (lookahead->token == L_BRACE) {
@@ -180,12 +189,15 @@ void SyntaxAnalyzer::if_statement() {
 	} else {
 		statement();
 	}
+	decrease_depth();
 
 	if (lookahead->token == ELSE_STATEMENT) {
 		else_statement();
 	}
 }
 void SyntaxAnalyzer::else_statement() {
+	pad("ELSE statement");
+	increase_depth();
 	match(ELSE_STATEMENT);
 	if (lookahead->token == L_BRACE) {
 		match(L_BRACE);
@@ -194,16 +206,21 @@ void SyntaxAnalyzer::else_statement() {
 	} else {
 		statement();
 	}
+	decrease_depth();
 }
 void SyntaxAnalyzer::while_statement() {
+	pad("WHILE statement");
+	increase_depth();
 	match(WHILE_STATEMENT);
 	boolean_expression();
 	if (lookahead->token == L_BRACE) {
+		match(L_BRACE);
 		statements();
 		match(R_BRACE);
 	} else {
 		statement();
 	}
+	decrease_depth();
 }
 void SyntaxAnalyzer::return_statement() {
 	pad("Return statement");
@@ -221,7 +238,7 @@ void SyntaxAnalyzer::identifier_prefix_statements() {
 	}
 }
 void SyntaxAnalyzer::method_call() {
-	pad("Method call");
+	pad("Function call");
 	increase_depth();
 	match(L_PARENTHESES);
 	expression();
@@ -302,7 +319,17 @@ void SyntaxAnalyzer::data_element() {
 }
 
 void SyntaxAnalyzer::boolean_expression() {
+	pad("Boolean expression");
+	increase_depth();
 	data_element();
+	relational_operator();
+	data_element();
+	decrease_depth();
+}
+
+void SyntaxAnalyzer::relational_operator() {
+	pad("Relational operator");
+	increase_depth();
 	match(RELATIONAL_OPERATOR);
-	data_element();
+	decrease_depth();
 }

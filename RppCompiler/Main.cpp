@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 		syntax = new SyntaxAnalyzer(lex);
 
 		syntax->parse();
-
+		
 		cout << syntax->getStream()->str() << endl;
 
 	} catch (exception &e) {
