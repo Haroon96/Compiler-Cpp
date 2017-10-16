@@ -33,8 +33,9 @@ int main(int argc, char *argv[]) {
 
 		syntax->parse();
 		
-		cout << syntax->getStream()->str() << endl;
-
+		ofstream fout("out.txt");
+		fout << syntax->getStream()->str() << endl;
+		fout.close();
 	} catch (exception &e) {
 		cerr << "Error encountered on line " << lex->getLineNumber() << endl;
 		cerr << "Details: " << e.what() << endl;
