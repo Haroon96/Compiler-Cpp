@@ -25,7 +25,7 @@ std::ostringstream* SyntaxAnalyzer::getStream() {
 
 void SyntaxAnalyzer::pad(std::string name) {
 	for (int i = 0; i < depth; ++i) {
-		*stream << "|---";
+		*stream << "|-- ";
 	}
 	*stream << name << std::endl;
 }
@@ -45,6 +45,17 @@ void SyntaxAnalyzer::increase_depth() {
 
 void SyntaxAnalyzer::decrease_depth() {
 	depth--;
+}
+
+char * SyntaxAnalyzer::process_token_error(Token token) {
+	switch (token) {
+	case ELSE_STATEMENT:
+		return "Dangling else statement";
+		break;
+	default:
+		return "Unrecognized start of statement";
+		break;
+	}
 }
 
 void SyntaxAnalyzer::start() {
@@ -92,16 +103,18 @@ void SyntaxAnalyzer::variable_declaration() {
 
 	data_type();
 	match(IDENTIFIER);
-	variable_initialization();
-
+	if (lookahead->token == ASSIGNMENT_OPERATOR) {
+		variable_initialization();
+	}
+	
 	decrease_depth();
 }
 
 void SyntaxAnalyzer::variable_initialization() {
-	if (lookahead->token == ASSIGNMENT_OPERATOR) {
-		match(ASSIGNMENT_OPERATOR);
-		expression();
-	}
+	pad("Variable initialization");
+	increase_depth();
+	assignment();
+	decrease_depth();
 }
 
 void SyntaxAnalyzer::data_type() {
@@ -151,13 +164,14 @@ void SyntaxAnalyzer::statement() {
 		break;
 	case INT_TYPE:
 	case CHAR_TYPE:
+		pad("Variable declaration");
 		variable_declaration();
 		break;
 	case IDENTIFIER:
 		identifier_prefix_statements();
 		break;
 	default:
-		throw std::exception("Unrecognized start of statement");
+		throw std::exception(process_token_error(lookahead->token));
 		break;
 	}
 	decrease_depth();
@@ -256,7 +270,12 @@ void SyntaxAnalyzer::expression() {
 	pad("Expression");
 	increase_depth();
 	term();
-	expression_p();
+	switch (lookahead->token) {
+	case ADDITION_OPERATOR:
+	case SUBTRACTION_OPERATOR:
+		expression_p();
+		break;
+	}
 	decrease_depth();
 }
 void SyntaxAnalyzer::expression_p() {
@@ -267,15 +286,22 @@ void SyntaxAnalyzer::expression_p() {
 		term();
 	} else if (lookahead->token == SUBTRACTION_OPERATOR) {
 		match(SUBTRACTION_OPERATOR);
-		expression_p();
+		term();
 	}
 	decrease_depth();
 }
 void SyntaxAnalyzer::term() {
 	pad("Term");
 	increase_depth();
-	factor();
-	term_p();
+	switch (lookahead->token) {
+	case MULTIPLICATION_OPERATOR:
+	case DIVISION_OPERATOR:
+		term_p();
+		break;
+	default:
+		factor();
+		break;
+	}
 	decrease_depth();
 }
 void SyntaxAnalyzer::term_p() {

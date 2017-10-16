@@ -33,6 +33,8 @@ private:
 	void increase_depth();
 	void decrease_depth();
 
+	char* process_token_error(Token token);
+
 	// grammar implementations
 	// may throw exceptions
 	void start();
