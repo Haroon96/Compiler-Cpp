@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
 	LexicalAnalyzer *lex = nullptr;
 	SyntaxAnalyzer *syntax = nullptr;
 
+	std::ostringstream err;
+
 	try {
 		
 		//verify(argc, argv);
@@ -32,14 +34,20 @@ int main(int argc, char *argv[]) {
 		syntax = new SyntaxAnalyzer(lex);
 
 		syntax->parse();
-		
-		ofstream fout("out.txt");
-		fout << syntax->getStream()->str() << endl;
-		fout.close();
+
 	} catch (exception &e) {
-		cerr << "Error encountered on line " << lex->getLineNumber() << endl;
-		cerr << "Details: " << e.what() << endl;
+		err << "Error encountered on line " << lex->getLineNumber() << endl;
+		err << "Details: " << e.what() << endl;
 	}
+
+	ofstream fout("tree.txt");
+	fout << syntax->getStream()->str() << endl;
+	cout << syntax->getStream()->str() << endl;	
+
+	fout << err.str();
+	cout << err.str();
+
+	fout.close();
 
 	src->close();
 

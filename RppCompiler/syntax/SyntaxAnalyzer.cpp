@@ -31,10 +31,10 @@ void SyntaxAnalyzer::pad(std::string name) {
 }
 
 bool SyntaxAnalyzer::match(Token token) {
-	if (lookahead->token != token) {
-		throw std::exception(std::string("Expected " + getTokenName(token) + " but encountered " + getTokenName(lookahead->token) + " instead").c_str());
+	if (lookahead->getToken() != token) {
+		throw std::exception(std::string("Expected " + getTokenName(token) + " but encountered " + getTokenName(lookahead->getToken()) + " instead").c_str());
 	}
-	pad(lookahead->lexeme);
+	pad(lookahead->getLexeme());
 	lookahead = lex->nextToken();
 	return true;
 }
@@ -60,10 +60,10 @@ char * SyntaxAnalyzer::process_token_error(Token token) {
 
 void SyntaxAnalyzer::start() {
 	increase_depth();
-	if (lookahead->token == DEF_STATEMENT) {
+	if (lookahead->getToken() == DEF_STATEMENT) {
 		pad("Function declaration");
 		function_declaration();
-	} else if (lookahead->token == INT_TYPE || lookahead->token == CHAR_TYPE) {
+	} else if (lookahead->getToken() == INT_TYPE || lookahead->getToken() == CHAR_TYPE) {
 		pad("Variable declaration");
 		variable_declaration();
 	} else {
@@ -91,7 +91,7 @@ void SyntaxAnalyzer::function_declaration() {
 }
 
 void SyntaxAnalyzer::parameters() {
-	if (lookahead->token != R_PARENTHESES) {
+	if (lookahead->getToken() != R_PARENTHESES) {
 		pad("Parameter");
 		variable_declaration();
 		additional_parameters();
@@ -103,7 +103,7 @@ void SyntaxAnalyzer::variable_declaration() {
 
 	data_type();
 	match(IDENTIFIER);
-	if (lookahead->token == ASSIGNMENT_OPERATOR) {
+	if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
 		variable_initialization();
 	}
 	
@@ -118,9 +118,9 @@ void SyntaxAnalyzer::variable_initialization() {
 }
 
 void SyntaxAnalyzer::data_type() {
-	if (lookahead->token == INT_TYPE) {
+	if (lookahead->getToken() == INT_TYPE) {
 		match(INT_TYPE);
-	} else if (lookahead->token == CHAR_TYPE) {
+	} else if (lookahead->getToken() == CHAR_TYPE) {
 		match(CHAR_TYPE);
 	} else {
 		throw std::exception("Invalid data type");
@@ -128,7 +128,7 @@ void SyntaxAnalyzer::data_type() {
 }
 
 void SyntaxAnalyzer::additional_parameters() {
-	if (lookahead->token == COMMA) {
+	if (lookahead->getToken() == COMMA) {
 		match(COMMA);
 		parameters();
 	}
@@ -137,7 +137,7 @@ void SyntaxAnalyzer::additional_parameters() {
 void SyntaxAnalyzer::statements() {
 	pad("Statement list");
 	increase_depth();
-	while (lookahead->token != R_BRACE) {
+	while (lookahead->getToken() != R_BRACE) {
 		statement();
 	}
 	decrease_depth();
@@ -146,7 +146,7 @@ void SyntaxAnalyzer::statements() {
 void SyntaxAnalyzer::statement() {
 	pad("Statement");
 	increase_depth();
-	switch (lookahead->token) {
+	switch (lookahead->getToken()) {
 	case PRINT_STATEMENT:
 		print_statement();
 		break;
@@ -171,7 +171,7 @@ void SyntaxAnalyzer::statement() {
 		identifier_prefix_statements();
 		break;
 	default:
-		throw std::exception(process_token_error(lookahead->token));
+		throw std::exception(process_token_error(lookahead->getToken()));
 		break;
 	}
 	decrease_depth();
@@ -196,7 +196,7 @@ void SyntaxAnalyzer::if_statement() {
 	increase_depth();
 	match(IF_STATEMENT);
 	boolean_expression();
-	if (lookahead->token == L_BRACE) {
+	if (lookahead->getToken() == L_BRACE) {
 		match(L_BRACE);
 		statements();
 		match(R_BRACE);
@@ -205,7 +205,7 @@ void SyntaxAnalyzer::if_statement() {
 	}
 	decrease_depth();
 
-	if (lookahead->token == ELSE_STATEMENT) {
+	if (lookahead->getToken() == ELSE_STATEMENT) {
 		else_statement();
 	}
 }
@@ -213,7 +213,7 @@ void SyntaxAnalyzer::else_statement() {
 	pad("ELSE statement");
 	increase_depth();
 	match(ELSE_STATEMENT);
-	if (lookahead->token == L_BRACE) {
+	if (lookahead->getToken() == L_BRACE) {
 		match(L_BRACE);
 		statements();
 		match(R_BRACE);
@@ -227,7 +227,7 @@ void SyntaxAnalyzer::while_statement() {
 	increase_depth();
 	match(WHILE_STATEMENT);
 	boolean_expression();
-	if (lookahead->token == L_BRACE) {
+	if (lookahead->getToken() == L_BRACE) {
 		match(L_BRACE);
 		statements();
 		match(R_BRACE);
@@ -245,9 +245,9 @@ void SyntaxAnalyzer::return_statement() {
 }
 void SyntaxAnalyzer::identifier_prefix_statements() {
 	match(IDENTIFIER);
-	if (lookahead->token == L_PARENTHESES) {
+	if (lookahead->getToken() == L_PARENTHESES) {
 		method_call();
-	} else if (lookahead->token == ASSIGNMENT_OPERATOR) {
+	} else if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
 		assignment();
 	}
 }
@@ -270,7 +270,7 @@ void SyntaxAnalyzer::expression() {
 	pad("Expression");
 	increase_depth();
 	term();
-	switch (lookahead->token) {
+	switch (lookahead->getToken()) {
 	case ADDITION_OPERATOR:
 	case SUBTRACTION_OPERATOR:
 		expression_p();
@@ -281,10 +281,10 @@ void SyntaxAnalyzer::expression() {
 void SyntaxAnalyzer::expression_p() {
 	pad("Expression'");
 	increase_depth();
-	if (lookahead->token == ADDITION_OPERATOR) {
+	if (lookahead->getToken() == ADDITION_OPERATOR) {
 		match(ADDITION_OPERATOR);
 		term();
-	} else if (lookahead->token == SUBTRACTION_OPERATOR) {
+	} else if (lookahead->getToken() == SUBTRACTION_OPERATOR) {
 		match(SUBTRACTION_OPERATOR);
 		term();
 	}
@@ -293,7 +293,7 @@ void SyntaxAnalyzer::expression_p() {
 void SyntaxAnalyzer::term() {
 	pad("Term");
 	increase_depth();
-	switch (lookahead->token) {
+	switch (lookahead->getToken()) {
 	case MULTIPLICATION_OPERATOR:
 	case DIVISION_OPERATOR:
 		term_p();
@@ -307,11 +307,11 @@ void SyntaxAnalyzer::term() {
 void SyntaxAnalyzer::term_p() {
 	pad("Term'");
 	increase_depth();
-	if (lookahead->token == MULTIPLICATION_OPERATOR) {
+	if (lookahead->getToken() == MULTIPLICATION_OPERATOR) {
 		match(MULTIPLICATION_OPERATOR);
 		factor();
 		term_p();
-	} else if (lookahead->token == DIVISION_OPERATOR) {
+	} else if (lookahead->getToken() == DIVISION_OPERATOR) {
 		match(DIVISION_OPERATOR);
 		factor();
 		term_p();
@@ -321,15 +321,15 @@ void SyntaxAnalyzer::term_p() {
 void SyntaxAnalyzer::factor() {
 	pad("Factor");
 	increase_depth();
-	if (lookahead->token == IDENTIFIER) {
+	if (lookahead->getToken() == IDENTIFIER) {
 		identifier_prefix_statements();
-	} else if (lookahead->token == NUMERIC_CONSTANT) {
+	} else if (lookahead->getToken() == NUMERIC_CONSTANT) {
 		match(NUMERIC_CONSTANT);
-	} else if (lookahead->token == L_PARENTHESES) {
+	} else if (lookahead->getToken() == L_PARENTHESES) {
 		match(L_PARENTHESES);
 		expression();
 		match(R_PARENTHESES);
-	} else if (lookahead->token == LITERAL_CONSTANT) {
+	} else if (lookahead->getToken() == LITERAL_CONSTANT) {
 		match(LITERAL_CONSTANT);
 	} else {
 		throw std::exception("Invalid expression");
@@ -337,7 +337,7 @@ void SyntaxAnalyzer::factor() {
 	decrease_depth();
 }
 void SyntaxAnalyzer::data_element() {
-	if (lookahead->token == LITERAL_CONSTANT) {
+	if (lookahead->getToken() == LITERAL_CONSTANT) {
 		match(LITERAL_CONSTANT);
 	} else {
 		expression();
