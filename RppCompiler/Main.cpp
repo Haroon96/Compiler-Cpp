@@ -3,33 +3,37 @@
 #include "syntax/SyntaxAnalyzer.h"
 using namespace std;
 
-ifstream* verify(int argc, char *argv[]) {
+bool verify(int argc, char *argv[], ifstream *&src) {
 	if (argc < 2) {
-		throw exception("Source file name not specified");
+		cerr << "Source file name not specified" << endl;
+		return false;
 	}
 
-	ifstream *src = new ifstream(argv[1]);
+	src = new ifstream(argv[1]);
 
 	if (!src->is_open()) {
-		throw exception("Invalid source file name specified");
+		cerr << "Invalid source file name specified" << endl;
+		return false;
 	}
 
-	return src;
+	return true;
 }
 
 int main(int argc, char *argv[]) {
 
-	ifstream *src;
 
 	LexicalAnalyzer *lex = nullptr;
 	SyntaxAnalyzer *syntax = nullptr;
 
 	std::ostringstream err;
 
+	ifstream *src;
+
+	if (!verify(argc, argv, src)) {
+		return 1;
+	}
+	
 	try {
-		
-		//verify(argc, argv);
-		src = new ifstream("in.txt");
 		lex = new LexicalAnalyzer(src);
 		syntax = new SyntaxAnalyzer(lex);
 
