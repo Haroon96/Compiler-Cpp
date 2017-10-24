@@ -105,6 +105,8 @@ void SyntaxAnalyzer::variable_declaration() {
 	match(IDENTIFIER);
 	if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
 		variable_initialization();
+	} else if (lookahead->getToken() == L_SUBSCRIPT_OPERATOR) {
+		array_declaration();
 	}
 	
 	decrease_depth();
@@ -359,3 +361,13 @@ void SyntaxAnalyzer::relational_operator() {
 	match(RELATIONAL_OPERATOR);
 	decrease_depth();
 }
+
+void SyntaxAnalyzer::array_declaration() {
+	pad("Array declaration");
+	increase_depth();
+	match(L_SUBSCRIPT_OPERATOR);
+	expression();
+	match(R_SUBSCRIPT_OPERATOR);
+	decrease_depth();
+}
+
