@@ -27,11 +27,11 @@ int main(int argc, char *argv[]) {
 
 	std::ostringstream err;
 
-	char* filename = "ok.rpp";
+	char* filename = argv[1];
 
 	ifstream *src;
 
-	if (!verify(2, filename, src)) {
+	if (!verify(argc, filename, src)) {
 		return 1;
 	}
 	
@@ -73,6 +73,7 @@ int main(int argc, char *argv[]) {
 	delete lex;
 	delete syntax;
 	delete src;
+
 	return 0;
 }
 
