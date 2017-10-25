@@ -18,13 +18,15 @@ public:
 	std::string getId(std::string index);
 	std::vector<std::string>::iterator getIdTblStart();
 	std::vector<std::string>::iterator getIdTblEnd();
-
+	std::ostringstream* getStream();
 	int getLineNumber();
 private:
 
 	std::vector<std::string> *idTbl;
 	int findId(std::string id);
 	std::ifstream *file;
+	std::ostringstream *tlStream;
 	int lineNumber;
 
+	static const char *padding;
 };

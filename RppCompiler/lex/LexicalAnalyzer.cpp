@@ -2,11 +2,15 @@
 #include "automata.h"
 #include "util.h"
 #include "../compiler.h"
+#include <sstream>
+
+const char *LexicalAnalyzer::padding = "                              ";
 
 LexicalAnalyzer::LexicalAnalyzer(std::ifstream * file) {
 	this->file = file;
 	this->idTbl = new std::vector<std::string>();
 	this->lineNumber = 1;
+	this->tlStream = new std::ostringstream();
 }
 
 TokenLexeme* LexicalAnalyzer::nextToken() {
@@ -108,9 +112,8 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 				// seek backwards
 				file->seekg(-1, std::ios_base::cur);
 			}
+
 			// if lexeme is an identifier
-			/*
-			******************** uncomment this code to enable identifier references
 			if (token == IDENTIFIER) {
 				// locate in symbol table
 				int index = findId(lexeme);
@@ -124,12 +127,19 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 					lexeme = std::to_string(idTbl->size() - 1);
 				}
 			}
-			*/
+
 			// set token-lexeme variable to end loop
 			tokenLexeme = new TokenLexeme(token, lexeme);
 		}
 
 	}
+	if (tokenLexeme != nullptr) {
+		std::string tokenName = getTokenName(tokenLexeme->getToken());
+		*tlStream << tokenName;
+		*tlStream << (padding + tokenName.length());
+		*tlStream << tokenLexeme->getLexeme() << std::endl;
+	}
+	
 	return tokenLexeme;
 }
 
@@ -147,6 +157,9 @@ std::vector<std::string>::iterator LexicalAnalyzer::getIdTblStart() {
 }
 std::vector<std::string>::iterator LexicalAnalyzer::getIdTblEnd() {
 	return idTbl->end();
+}
+std::ostringstream* LexicalAnalyzer::getStream() {
+	return tlStream;
 }
 int LexicalAnalyzer::getLineNumber() {
 	return lineNumber;

@@ -3,13 +3,13 @@
 #include "syntax/SyntaxAnalyzer.h"
 using namespace std;
 
-bool verify(int argc, char *argv[], ifstream *&src) {
+bool verify(int argc, char *filename, ifstream *&src) {
 	if (argc < 2) {
 		cerr << "Source file name not specified" << endl;
 		return false;
 	}
 
-	src = new ifstream(argv[1]);
+	src = new ifstream(filename);
 
 	if (!src->is_open()) {
 		cerr << "Invalid source file name specified" << endl;
@@ -27,9 +27,11 @@ int main(int argc, char *argv[]) {
 
 	std::ostringstream err;
 
+	char* filename = "ok.rpp";
+
 	ifstream *src;
 
-	if (!verify(argc, argv, src)) {
+	if (!verify(2, filename, src)) {
 		return 1;
 	}
 	
@@ -44,14 +46,27 @@ int main(int argc, char *argv[]) {
 		err << "Details: " << e.what() << endl;
 	}
 
-	ofstream fout("tree.txt");
-	fout << syntax->getStream()->str() << endl;
-	cout << syntax->getStream()->str() << endl;	
+	if (err.str().length() == 0) {
+		std::cout << "Compiled successfully." << std::endl;
+	} else {
+		std::cout << err.str() << std::endl;
+	}
+	
+	ofstream tree(filename + std::string(".tree.txt"));
+	ofstream tknlex(filename + std::string(".tknlex.txt"));
+	ofstream idTbl(filename + std::string(".idtbl.txt"));
 
-	fout << err.str();
-	cout << err.str();
+	tree << syntax->getStream()->str() << endl;
+	tree << err.str() << std::endl;
+	tknlex << lex->getStream()->str() << std::endl;
 
-	fout.close();
+	for (std::vector<std::string>::iterator i = lex->getIdTblStart(); i != lex->getIdTblEnd(); ++i) {
+		idTbl << (*i) << std::endl;
+	}
+
+	tree.close();
+	tknlex.close();
+	idTbl.close();
 
 	src->close();
 
