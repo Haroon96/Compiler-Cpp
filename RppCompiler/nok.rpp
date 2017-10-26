@@ -1,4 +1,0 @@
-def foo() {
-	if a < b
-	else if a < c
-}

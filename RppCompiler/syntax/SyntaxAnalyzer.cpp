@@ -272,12 +272,7 @@ void SyntaxAnalyzer::expression() {
 	pad("Expression");
 	increase_depth();
 	term();
-	switch (lookahead->getToken()) {
-	case ADDITION_OPERATOR:
-	case SUBTRACTION_OPERATOR:
-		expression_p();
-		break;
-	}
+	expression_p();
 	decrease_depth();
 }
 void SyntaxAnalyzer::expression_p() {
@@ -286,24 +281,19 @@ void SyntaxAnalyzer::expression_p() {
 	if (lookahead->getToken() == ADDITION_OPERATOR) {
 		match(ADDITION_OPERATOR);
 		term();
+		expression_p();
 	} else if (lookahead->getToken() == SUBTRACTION_OPERATOR) {
 		match(SUBTRACTION_OPERATOR);
 		term();
+		expression_p();
 	}
 	decrease_depth();
 }
 void SyntaxAnalyzer::term() {
 	pad("Term");
 	increase_depth();
-	switch (lookahead->getToken()) {
-	case MULTIPLICATION_OPERATOR:
-	case DIVISION_OPERATOR:
-		term_p();
-		break;
-	default:
-		factor();
-		break;
-	}
+	factor();
+	term_p();
 	decrease_depth();
 }
 void SyntaxAnalyzer::term_p() {
