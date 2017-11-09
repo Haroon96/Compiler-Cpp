@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../lex/LexicalAnalyzer.h"
+#include "../translator/Translator.h"
 #include <sstream>
 
 enum Token;
@@ -9,12 +10,7 @@ class SyntaxAnalyzer {
 
 public:
 
-	SyntaxAnalyzer(LexicalAnalyzer* lex) {
-		this->lex = lex;
-		this->lookahead = nullptr;
-		this->depth = 0;
-		this->stream = new std::ostringstream();
-	}
+	SyntaxAnalyzer(LexicalAnalyzer* lex, Translator *translator);
 	int getLineNumber();
 	void parse();
 	std::ostringstream* getStream();
@@ -22,6 +18,7 @@ public:
 private:
 
 	LexicalAnalyzer* lex;
+	Translator* translator;
 	TokenLexeme* lookahead;
 
 	int depth;
@@ -43,7 +40,6 @@ private:
 	void variable_declaration();
 	void variable_initialization();
 	void data_type();
-	void additional_parameters();
 	void statements();
 	void statement();
 	void print_statement();

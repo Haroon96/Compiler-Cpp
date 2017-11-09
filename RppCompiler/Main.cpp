@@ -1,6 +1,7 @@
 #include <iostream>
-#include "lex/LexicalAnalyzer.h"
-#include "syntax/SyntaxAnalyzer.h"
+#include "lex\LexicalAnalyzer.h"
+#include "syntax\SyntaxAnalyzer.h"
+#include "translator\Translator.h"
 using namespace std;
 
 bool verify(int argc, char *filename, ifstream *&src) {
@@ -30,6 +31,7 @@ int main(int argc, char *argv[]) {
 
 	LexicalAnalyzer *lex = nullptr;
 	SyntaxAnalyzer *syntax = nullptr;
+	Translator *translator = nullptr;
 
 	std::ostringstream err;
 
@@ -43,7 +45,8 @@ int main(int argc, char *argv[]) {
 	
 	try {
 		lex = new LexicalAnalyzer(src);
-		syntax = new SyntaxAnalyzer(lex);
+		translator = new Translator();
+		syntax = new SyntaxAnalyzer(lex, translator);
 
 		syntax->parse();
 
@@ -57,7 +60,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		std::cout << err.str() << std::endl;
 	}
-	
+	std::cout << (*translator->getStream()) << std::endl;
 	ofstream tree(filename + std::string(".tree.txt"));
 	ofstream tknlex(filename + std::string(".lex.txt"));
 	ofstream idTbl(filename + std::string(".lex_ids.txt"));
@@ -73,7 +76,6 @@ int main(int argc, char *argv[]) {
 	tree.close();
 	tknlex.close();
 	idTbl.close();
-
 	src->close();
 
 	delete lex;

@@ -24,6 +24,7 @@ private:
 
 	std::vector<std::string> *idTbl;
 	int findId(std::string id);
+	std::string getIdLexeme(int index);
 	std::ifstream *file;
 	std::ostringstream *tlStream;
 	int lineNumber;

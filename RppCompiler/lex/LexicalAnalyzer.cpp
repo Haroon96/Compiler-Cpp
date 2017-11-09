@@ -173,3 +173,7 @@ int LexicalAnalyzer::findId(std::string id) {
 	}
 	return -1;
 }
+
+std::string LexicalAnalyzer::getIdLexeme(int index) {
+	return (*idTbl)[index];
+}
