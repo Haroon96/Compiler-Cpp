@@ -7,6 +7,7 @@ Translator::Translator() {
 	stack = new std::stack<std::string>();
 	lineNumber = 0;
 	tmp_index = 0;
+	offset = 0;
 	newline();
 }
 
@@ -24,7 +25,7 @@ void Translator::newline() {
 	tac->append("\n");
 	tac->append("L");
 	tac->append(std::to_string(lineNumber));
-	tac->append(":");
+	tac->append(":\t");
 }
 
 void Translator::write_label(std::string s) {
@@ -34,6 +35,10 @@ void Translator::write_label(std::string s) {
 void Translator::write(std::string s) {
 	tac->append(s);
 	tac->append(" ");
+}
+
+void Translator::write(int n) {
+	write(std::to_string(n));
 }
 
 void Translator::mark_patch() {
@@ -55,6 +60,7 @@ void Translator::patch(int s) {
 }
 
 std::string Translator::get_temp_var() {
+	++offset;
 	return "tmp" + std::to_string((++tmp_index));
 }
 
@@ -67,6 +73,10 @@ std::string Translator::pop() {
 	std::string tmp = stack->top();
 	stack->pop();
 	return tmp;
+}
+
+int Translator::getOffset() {
+	return (offset++) * 4;
 }
 
 std::string * Translator::getStream() {

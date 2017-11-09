@@ -36,3 +36,12 @@ std::string getTokenName(Token t) {
 	};
 	return tokens[t - 300];
 }
+
+std::string getSymbolType(SymbolType t) {
+	static std::string symbol_types[] = {
+		"FUNCTION",
+		"VARIABLE",
+		"UNDECLARED"
+	};
+	return symbol_types[t];
+}

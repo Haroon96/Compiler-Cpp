@@ -32,7 +32,15 @@ enum Token {
 	L_PARENTHESES,
 	R_PARENTHESES
 };
+
+enum SymbolType {
+	FUNCTION,
+	VARIABLE,
+	UNDECLARED
+};
+
 std::string getTokenName(Token t);
+std::string getSymbolType(SymbolType t);
 
 struct TokenLexeme {
 	TokenLexeme(Token token, std::string lexeme) : token(token), lexeme(lexeme) {}
@@ -51,4 +59,28 @@ struct TokenLexeme {
 private:
 	Token token;
 	std::string lexeme;
+};
+
+struct Symbol {
+	Symbol(std::string name) :name(name), offset(-1), type(UNDECLARED) {
+	}
+	void setOffset(int offset) {
+		this->offset = offset;
+	}
+	void setType(SymbolType type) {
+		this->type = type;
+	}
+	std::string getName() {
+		return name;
+	}
+	int getOffset() {
+		return offset;
+	}
+	SymbolType getType() {
+		return type;
+	}
+private:
+	std::string name;
+	int offset;
+	SymbolType type;
 };

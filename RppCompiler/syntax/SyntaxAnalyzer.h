@@ -49,7 +49,7 @@ private:
 	void while_statement();
 	void return_statement();
 	void identifier_prefix_statements();
-	void method_call();
+	int method_call();
 	void assignment();
 	void expression();
 	void expression_p();

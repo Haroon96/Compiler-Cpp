@@ -2,6 +2,7 @@
 #include "lex\LexicalAnalyzer.h"
 #include "syntax\SyntaxAnalyzer.h"
 #include "translator\Translator.h"
+#include "compiler.h"
 using namespace std;
 
 bool verify(int argc, char *filename, ifstream *&src) {
@@ -55,22 +56,26 @@ int main(int argc, char *argv[]) {
 		err << "Details: " << e.what() << endl;
 	}
 
-	if (err.str().length() == 0) {
+	bool errorOccurred = (err.str().length() == 0);
+
+	if (errorOccurred) {
 		std::cout << "Compiled successfully." << std::endl;
 	} else {
 		std::cout << err.str() << std::endl;
 	}
-	std::cout << (*translator->getStream()) << std::endl;
+
 	ofstream tree(filename + std::string(".tree.txt"));
 	ofstream tknlex(filename + std::string(".lex.txt"));
 	ofstream idTbl(filename + std::string(".lex_ids.txt"));
+	ofstream tac(filename + std::string(".tac.txt"));
 
 	tree << syntax->getStream()->str() << endl;
 	tree << err.str() << std::endl;
 	tknlex << lex->getStream()->str() << std::endl;
+	tac << (*translator->getStream()) << std::endl;
 
-	for (std::vector<std::string>::iterator i = lex->getIdTblStart(); i != lex->getIdTblEnd(); ++i) {
-		idTbl << (*i) << std::endl;
+	for (std::vector<Symbol*>::iterator i = lex->getSymbolTableStart(); i != lex->getSymbolTableEnd(); ++i) {
+		idTbl << (*i)->getName() << " " << (*i)->getOffset() << " " << getSymbolType((*i)->getType()) << std::endl;
 	}
 
 	tree.close();

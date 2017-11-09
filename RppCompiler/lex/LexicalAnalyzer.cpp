@@ -8,7 +8,7 @@ const char *LexicalAnalyzer::padding = "                              ";
 
 LexicalAnalyzer::LexicalAnalyzer(std::ifstream * file) {
 	this->file = file;
-	this->idTbl = new std::vector<std::string>();
+	this->symbolTable = new std::vector<Symbol*>();
 	this->lineNumber = 1;
 	this->tlStream = new std::ostringstream();
 }
@@ -123,8 +123,8 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 					lexeme = std::to_string(index);
 				} else {
 					// else add it to symbol table
-					idTbl->push_back(lexeme);
-					lexeme = std::to_string(idTbl->size() - 1);
+					symbolTable->push_back(new Symbol(lexeme));
+					lexeme = std::to_string(symbolTable->size() - 1);
 				}
 			}
 
@@ -147,16 +147,20 @@ bool LexicalAnalyzer::hasNextToken() {
 	return file->peek() != EOF;
 }
 LexicalAnalyzer::~LexicalAnalyzer() {
-	delete idTbl;
+	symbolTable->clear();
+	delete symbolTable;
 }
 std::string LexicalAnalyzer::getId(std::string index) {
-	return (*idTbl)[std::stoi(index)];
+	return (*symbolTable)[std::stoi(index)]->getName();
 }
-std::vector<std::string>::iterator LexicalAnalyzer::getIdTblStart() {
-	return idTbl->begin();
+std::vector<Symbol*>::iterator LexicalAnalyzer::getSymbolTableStart() {
+	return symbolTable->begin();
 }
-std::vector<std::string>::iterator LexicalAnalyzer::getIdTblEnd() {
-	return idTbl->end();
+std::vector<Symbol*>::iterator LexicalAnalyzer::getSymbolTableEnd() {
+	return symbolTable->end();
+}
+Symbol * LexicalAnalyzer::getSymbol(std::string id) {
+	return (*symbolTable)[std::stoi(id)];
 }
 std::ostringstream* LexicalAnalyzer::getStream() {
 	return tlStream;
@@ -165,15 +169,11 @@ int LexicalAnalyzer::getLineNumber() {
 	return lineNumber;
 }
 int LexicalAnalyzer::findId(std::string id) {
-	int size = idTbl->size();
+	int size = symbolTable->size();
 	for (int i = 0; i < size; ++i) {
-		if ((*idTbl)[i] == id) {
+		if ((*symbolTable)[i]->getName() == id) {
 			return i;
 		}
 	}
 	return -1;
-}
-
-std::string LexicalAnalyzer::getIdLexeme(int index) {
-	return (*idTbl)[index];
 }

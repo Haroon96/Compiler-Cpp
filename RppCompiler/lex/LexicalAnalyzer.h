@@ -5,6 +5,7 @@
 #include <fstream>
 
 struct TokenLexeme;
+struct Symbol;
 
 class LexicalAnalyzer {
 public:
@@ -16,15 +17,15 @@ public:
 	bool hasNextToken();
 
 	std::string getId(std::string index);
-	std::vector<std::string>::iterator getIdTblStart();
-	std::vector<std::string>::iterator getIdTblEnd();
+	int findId(std::string id);
+	std::vector<Symbol*>::iterator getSymbolTableStart();
+	std::vector<Symbol*>::iterator getSymbolTableEnd();
+	Symbol* getSymbol(std::string id);
 	std::ostringstream* getStream();
 	int getLineNumber();
 private:
 
-	std::vector<std::string> *idTbl;
-	int findId(std::string id);
-	std::string getIdLexeme(int index);
+	std::vector<Symbol*> *symbolTable;
 	std::ifstream *file;
 	std::ostringstream *tlStream;
 	int lineNumber;

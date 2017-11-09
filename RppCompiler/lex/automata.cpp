@@ -99,7 +99,7 @@ Token automata::literal_constant(char symbol, int & state) {
 		}
 		break;
 	case 3:
-		if (isWhitespace(symbol)) {
+		if (isWhitespace(symbol) || isOperator(symbol)) {
 			return LITERAL_CONSTANT;
 		}
 		break;

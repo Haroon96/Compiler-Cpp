@@ -1,3 +1,16 @@
+def foo(int x, int y) {
+	return x + y
+}
 def main() {
-	int a = 5+2*4+10*2
+	int a = foo(5,10)
+	int i
+	int j
+	while 20+10 < 10*2 {
+
+		if i > 10/2+5
+			print i/3
+		else
+			print j/3
+		i=i+1
+	}
 }
