@@ -23,13 +23,6 @@ bool verify(int argc, char *filename, ifstream *&src) {
 
 int main(int argc, char *argv[]) {
 
-	// test code
-	// specifies file input
-	// ======================
-	argv = new char*[2]{ {nullptr}, {"input.txt"} };
-	argc = 2;
-	// ======================
-
 	LexicalAnalyzer *lex = nullptr;
 	SyntaxAnalyzer *syntax = nullptr;
 	Translator *translator = nullptr;

@@ -119,6 +119,7 @@ void SyntaxAnalyzer::function_declaration() {
 	decrease_depth();
 
 	translator->write(")");
+	translator->write(":");
 	translator->newline();
 
 	match(R_PARENTHESES);
