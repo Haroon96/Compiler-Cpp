@@ -28,15 +28,19 @@ int main(int argc, char *argv[]) {
 	Translator *translator = nullptr;
 
 	std::ostringstream err;
-
-	char* filename = argv[1];
-
 	ifstream *src;
+
+	// test code. remove from production.
+	char* filename = "test.txt";
+	argc = 2;
+	// -------------------------
+	
+	//char* filename = argv[1];
 
 	if (!verify(argc, filename, src)) {
 		return 1;
 	}
-	
+
 	try {
 		lex = new LexicalAnalyzer(src);
 		translator = new Translator();
@@ -68,7 +72,7 @@ int main(int argc, char *argv[]) {
 	tac << (*translator->getStream()) << std::endl;
 
 	for (std::vector<Symbol*>::iterator i = lex->getSymbolTableStart(); i != lex->getSymbolTableEnd(); ++i) {
-		idTbl << (*i)->getName() << " " << (*i)->getOffset() << " " << getSymbolType((*i)->getType()) << std::endl;
+		idTbl << (*i)->getName() << "\t" << (*i)->getOffset() << "\t" << getSymbolType((*i)->getType()) << std::endl;
 	}
 
 	tree.close();

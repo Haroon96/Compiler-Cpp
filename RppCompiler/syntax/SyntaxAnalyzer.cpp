@@ -301,10 +301,10 @@ void SyntaxAnalyzer::while_statement() {
 	pad("WHILE statement");
 	increase_depth();
 	match(WHILE_STATEMENT);
-	boolean_expression();
-
 
 	int start = translator->getLineNumber();
+	
+	boolean_expression();
 
 	translator->write("IF");
 	std::string op2 = translator->pop();
