@@ -56,6 +56,7 @@ private:
 	void term();
 	void term_p();
 	void factor();
+	void identifier_prefix_factors();
 	void data_element();
 	void boolean_expression();
 	void relational_operator();

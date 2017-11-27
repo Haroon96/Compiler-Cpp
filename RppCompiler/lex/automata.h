@@ -3,7 +3,6 @@
 enum Token;
 
 namespace automata {
-	
 	Token numeric_constants(char symbol, int& state);
 	Token identifiers(char symbol, int &state);
 	Token whitespace(char symbol, int &state);

@@ -145,11 +145,14 @@ void SyntaxAnalyzer::variable_declaration() {
 	increase_depth();
 
 	data_type();
-	Symbol *symbol = lex->getSymbol(lookahead->getLexeme());
+	
+Symbol *symbol = lex->getSymbol(lookahead->getLexeme());
 	symbol->setType(VARIABLE);
 	symbol->setOffset(translator->getOffset());
 	translator->push(lex->getId(lookahead->getLexeme()));
+	
 	match(IDENTIFIER);
+
 	if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
 		variable_initialization();
 	} else if (lookahead->getToken() == L_SUBSCRIPT_OPERATOR) {
@@ -371,25 +374,22 @@ void SyntaxAnalyzer::identifier_prefix_statements() {
 		expression();
 		match(R_SUBSCRIPT_OPERATOR);
 
-		std::string tmp = translator->get_temp_var();
-		translator->push(tmp);
-		
-		if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
-			assignment();
-		}
-		
+		assignment();
+
+		std::string tmp_var = translator->pop();
+
 		translator->write(id);
 		translator->write("[");
 		translator->write(translator->pop());
 		translator->write("]");
 		translator->write("=");
-		translator->write(tmp);
+		translator->write(tmp_var);
 		translator->newline();
 	} else if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
-		translator->push(id);
 		assignment();
-	} else {
-		translator->push(id);
+		translator->write(id);
+		translator->write("=");
+		translator->write(translator->pop());
 	}
 }
 int SyntaxAnalyzer::method_call() {
@@ -416,11 +416,6 @@ void SyntaxAnalyzer::assignment() {
 	increase_depth();
 	match(ASSIGNMENT_OPERATOR);
 	expression();
-	std::string result = translator->pop();
-	translator->write(translator->pop());
-	translator->write("=");
-	translator->write(result);
-	translator->newline();
 	decrease_depth();
 }
 void SyntaxAnalyzer::expression() {
@@ -497,7 +492,7 @@ void SyntaxAnalyzer::factor() {
 	pad("Factor");
 	increase_depth();
 	if (lookahead->getToken() == IDENTIFIER) {
-		identifier_prefix_statements();
+		identifier_prefix_factors();
 	} else if (lookahead->getToken() == NUMERIC_CONSTANT) {
 		translator->push(lookahead->getLexeme());
 		match(NUMERIC_CONSTANT);
@@ -512,6 +507,46 @@ void SyntaxAnalyzer::factor() {
 		throw std::exception("Invalid expression");
 	}
 	decrease_depth();
+}
+
+void SyntaxAnalyzer::identifier_prefix_factors() {
+	std::string id = lex->getId(lookahead->getLexeme());
+	match(IDENTIFIER);
+	if (lookahead->getToken() == L_PARENTHESES) {
+		int params = method_call();
+		std::string tmp = translator->get_temp_var();
+		translator->write(tmp);
+		translator->write("=");
+		translator->write(id);
+		translator->write("(");
+		for (int i = 0; i < params; ++i) {
+			translator->mark_patch();
+			if (i < params - 1)
+				translator->write(",");
+		}
+		for (int i = 0; i < params; ++i) {
+			translator->patch(translator->pop());
+		}
+		translator->write(")");
+		translator->newline();
+		translator->push(tmp);
+	} else if (lookahead->getToken() == L_SUBSCRIPT_OPERATOR) {
+		match(L_SUBSCRIPT_OPERATOR);
+		expression();
+		match(R_SUBSCRIPT_OPERATOR);
+
+		std::string tmp = translator->get_temp_var();
+		translator->write(tmp);
+		translator->write("=");
+		translator->write(id);
+		translator->write("[");
+		translator->write(translator->pop());
+		translator->write("]");
+		translator->push(tmp);
+		translator->newline();
+	} else {
+		translator->push(id);
+	}
 }
 
 void SyntaxAnalyzer::data_element() {

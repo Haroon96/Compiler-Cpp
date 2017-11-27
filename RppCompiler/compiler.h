@@ -39,6 +39,22 @@ enum SymbolType {
 	UNDECLARED
 };
 
+enum OpCode {
+	ADD,
+	SUB,
+	MUL,
+	DIV,
+	PRINT,
+	GET,
+	IF_GE_GOTO,
+	IF_LE_GOTO,
+	IF_L_GOTO,
+	IF_G_GOTO,
+	IF_E_GOTO,
+	IF_NE_GOTO,
+	ELSE
+};
+
 std::string getTokenName(Token t);
 std::string getSymbolType(SymbolType t);
 

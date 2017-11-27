@@ -53,7 +53,7 @@ Token automata::relational_operators(char symbol, int & state) {
 	case 0:
 		if (symbol == '>' || symbol == '<') {
 			state = 1;
-		} else if (symbol == '=') {
+		} else if (symbol == '=' || symbol == '!') {
 			state = 3;
 		}
 		break;
