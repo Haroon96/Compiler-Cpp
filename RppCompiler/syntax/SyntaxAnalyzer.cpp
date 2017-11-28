@@ -149,10 +149,13 @@ void SyntaxAnalyzer::parameters() {
 }
 
 void SyntaxAnalyzer::variable_declaration() {
-	increase_depth();
-
+	increase_depth(); 
 	SymbolType symbolType = data_type();
-	
+	variable_declaration_list(symbolType);
+	decrease_depth();
+}
+
+void SyntaxAnalyzer::variable_declaration_list(SymbolType symbolType) {
 	Symbol *symbol = symbolTable->getSymbol(lookahead->getLexeme());
 	symbol->setType(symbolType);
 	symbol->setLength(1);
@@ -169,7 +172,11 @@ void SyntaxAnalyzer::variable_declaration() {
 		symbol->setLength(std::stoi(translator->pop()));
 	}
 	
-	decrease_depth();
+	if (lookahead->getToken() == COMMA) {
+		match(COMMA);
+		variable_declaration_list(symbolType);
+	}
+
 }
 
 void SyntaxAnalyzer::variable_initialization() {
@@ -180,7 +187,6 @@ void SyntaxAnalyzer::variable_initialization() {
 }
 
 SymbolType SyntaxAnalyzer::data_type() {
-//	translator->push(lookahead->getLexeme());
 	if (lookahead->getToken() == INT_TYPE) {
 		match(INT_TYPE);
 		return INT_VAR;

@@ -40,6 +40,7 @@ private:
 	void function_declaration();
 	void parameters();
 	void variable_declaration();
+	void variable_declaration_list(SymbolType type);
 	void variable_initialization();
 	SymbolType data_type();
 	void statements(int reset_point = 0);
