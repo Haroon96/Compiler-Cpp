@@ -36,6 +36,9 @@
     <ClCompile Include="translator\Translator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vm\VirtualMachine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lex\automata.h">
@@ -54,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="translator\Translator.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vm\VirtualMachine.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

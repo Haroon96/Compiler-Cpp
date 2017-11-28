@@ -6,9 +6,9 @@
 
 const char *LexicalAnalyzer::padding = "                              ";
 
-LexicalAnalyzer::LexicalAnalyzer(std::ifstream * file) {
+LexicalAnalyzer::LexicalAnalyzer(std::ifstream * file, SymbolTable * symbolTable) {
 	this->file = file;
-	this->symbolTable = new std::vector<Symbol*>();
+	this->symbolTable = symbolTable;
 	this->lineNumber = 1;
 	this->tlStream = new std::ostringstream();
 }
@@ -116,15 +116,15 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 			// if lexeme is an identifier
 			if (token == IDENTIFIER) {
 				// locate in symbol table
-				int index = findId(lexeme);
+				int index = symbolTable->indexOf(lexeme);
 
 				// if found, reference it
-				if (index >= 0) {
+				if (index != -1) {
 					lexeme = std::to_string(index);
 				} else {
 					// else add it to symbol table
-					symbolTable->push_back(new Symbol(lexeme));
-					lexeme = std::to_string(symbolTable->size() - 1);
+					int new_index = symbolTable->addSymbol(new Symbol(lexeme));
+					lexeme = std::to_string(new_index);
 				}
 			}
 
@@ -146,34 +146,10 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 bool LexicalAnalyzer::hasNextToken() {
 	return file->peek() != EOF;
 }
-LexicalAnalyzer::~LexicalAnalyzer() {
-	symbolTable->clear();
-	delete symbolTable;
-}
-std::string LexicalAnalyzer::getId(std::string index) {
-	return (*symbolTable)[std::stoi(index)]->getName();
-}
-std::vector<Symbol*>::iterator LexicalAnalyzer::getSymbolTableStart() {
-	return symbolTable->begin();
-}
-std::vector<Symbol*>::iterator LexicalAnalyzer::getSymbolTableEnd() {
-	return symbolTable->end();
-}
-Symbol * LexicalAnalyzer::getSymbol(std::string id) {
-	return (*symbolTable)[std::stoi(id)];
-}
-std::ostringstream* LexicalAnalyzer::getStream() {
+std::ostringstream * LexicalAnalyzer::getStream() {
 	return tlStream;
 }
+
 int LexicalAnalyzer::getLineNumber() {
 	return lineNumber;
-}
-int LexicalAnalyzer::findId(std::string id) {
-	int size = symbolTable->size();
-	for (int i = 0; i < size; ++i) {
-		if ((*symbolTable)[i]->getName() == id) {
-			return i;
-		}
-	}
-	return -1;
 }

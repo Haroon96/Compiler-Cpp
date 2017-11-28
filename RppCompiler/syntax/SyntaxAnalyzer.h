@@ -5,12 +5,13 @@
 #include <sstream>
 
 enum Token;
+enum SymbolType;
 
 class SyntaxAnalyzer {
 
 public:
 
-	SyntaxAnalyzer(LexicalAnalyzer* lex, Translator *translator);
+	SyntaxAnalyzer(LexicalAnalyzer* lex, Translator *translator, SymbolTable *symbolTable);
 	int getLineNumber();
 	void parse();
 	std::ostringstream* getStream();
@@ -19,6 +20,7 @@ private:
 
 	LexicalAnalyzer* lex;
 	Translator* translator;
+	SymbolTable *symbolTable;
 	TokenLexeme* lookahead;
 
 	int depth;
@@ -39,7 +41,7 @@ private:
 	void parameters();
 	void variable_declaration();
 	void variable_initialization();
-	void data_type();
+	SymbolType data_type();
 	void statements();
 	void statement();
 	void print_statement();

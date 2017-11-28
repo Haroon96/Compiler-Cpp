@@ -6,26 +6,21 @@
 
 struct TokenLexeme;
 struct Symbol;
+class SymbolTable;
 
 class LexicalAnalyzer {
 public:
 
-	LexicalAnalyzer(std::ifstream *file);
-	~LexicalAnalyzer();
+	LexicalAnalyzer(std::ifstream *file, SymbolTable *symbolTable);
 
 	TokenLexeme* nextToken();
 	bool hasNextToken();
 
-	std::string getId(std::string index);
-	int findId(std::string id);
-	std::vector<Symbol*>::iterator getSymbolTableStart();
-	std::vector<Symbol*>::iterator getSymbolTableEnd();
-	Symbol* getSymbol(std::string id);
 	std::ostringstream* getStream();
 	int getLineNumber();
 private:
 
-	std::vector<Symbol*> *symbolTable;
+	SymbolTable *symbolTable;
 	std::ifstream *file;
 	std::ostringstream *tlStream;
 	int lineNumber;

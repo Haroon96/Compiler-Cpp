@@ -2,6 +2,7 @@
 #include "lex\LexicalAnalyzer.h"
 #include "syntax\SyntaxAnalyzer.h"
 #include "translator\Translator.h"
+#include "vm\VirtualMachine.h"
 #include "compiler.h"
 using namespace std;
 
@@ -23,9 +24,11 @@ bool verify(int argc, char *filename, ifstream *&src) {
 
 int main(int argc, char *argv[]) {
 
+	SymbolTable *symbolTable = nullptr;
 	LexicalAnalyzer *lex = nullptr;
 	SyntaxAnalyzer *syntax = nullptr;
 	Translator *translator = nullptr;
+	VirtualMachine *vm = nullptr;
 
 	std::ostringstream err;
 	ifstream *src;
@@ -42,11 +45,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	try {
-		lex = new LexicalAnalyzer(src);
-		translator = new Translator();
-		syntax = new SyntaxAnalyzer(lex, translator);
+		symbolTable = new SymbolTable();
+		lex = new LexicalAnalyzer(src, symbolTable);
+		translator = new Translator(symbolTable);
+		syntax = new SyntaxAnalyzer(lex, translator, symbolTable);
 
 		syntax->parse();
+
+		translator->finalize();
 
 	} catch (exception &e) {
 		err << "Error encountered on line " << lex->getLineNumber() << endl;
@@ -64,25 +70,26 @@ int main(int argc, char *argv[]) {
 	ofstream tree(filename + std::string(".tree.txt"));
 	ofstream tknlex(filename + std::string(".lex.txt"));
 	ofstream idTbl(filename + std::string(".lex_ids.txt"));
-	ofstream tac(filename + std::string(".tac.txt"));
+	ofstream tac(filename + std::string(".mcode.txt"));
 
 	tree << syntax->getStream()->str() << endl;
 	tree << err.str() << std::endl;
 	tknlex << lex->getStream()->str() << std::endl;
 	tac << (*translator->getStream()) << std::endl;
 
-	for (std::vector<Symbol*>::iterator i = lex->getSymbolTableStart(); i != lex->getSymbolTableEnd(); ++i) {
-		idTbl << (*i)->getName() << "\t" << (*i)->getOffset() << "\t" << getSymbolType((*i)->getType()) << std::endl;
-	}
-
 	tree.close();
 	tknlex.close();
 	idTbl.close();
 	src->close();
 
+
+	vm = new VirtualMachine(new ifstream(filename + std::string(".mcode.txt")));
+	vm->execute();
+
 	delete lex;
 	delete syntax;
 	delete src;
+	delete vm;
 
 	return 0;
 }

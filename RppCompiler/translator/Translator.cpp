@@ -1,14 +1,15 @@
 #include "Translator.h"
+#include "../compiler.h"
 #include <string>
 
-Translator::Translator() {
+Translator::Translator(SymbolTable *symbolTable) {
+	this->symbolTable = symbolTable; 
 	tac = new std::string();
 	patch_marks = new std::stack<int>();
 	stack = new std::stack<std::string>();
-	lineNumber = 0;
+	instruction_count = 0;
 	tmp_index = 0;
-	offset = 0;
-	newline();
+	max_tmp_index = -1;
 }
 
 Translator::~Translator() {
@@ -16,20 +17,15 @@ Translator::~Translator() {
 	delete patch_marks;
 }
 
-int Translator::getLineNumber() {
-	return lineNumber;
-}
-
-void Translator::newline() {
-	++lineNumber;
-	tac->append("\n");
-	tac->append("L");
-	tac->append(std::to_string(lineNumber));
-	tac->append(":\t");
+int Translator::get_instruction_count() {
+	return instruction_count;
 }
 
 void Translator::write_label(std::string s) {
-	tac->append(s);
+	write(LABEL);
+	write(s);
+	write(UNUSED);
+	write(UNUSED);
 }
 
 void Translator::write(std::string s) {
@@ -39,6 +35,13 @@ void Translator::write(std::string s) {
 
 void Translator::write(int n) {
 	write(std::to_string(n));
+}
+
+void Translator::write_instruction(OpCode op, int dst, int op1, int op2) {
+	write(op);
+	write(dst);
+	write(op1);
+	write(op2);
 }
 
 void Translator::mark_patch() {
@@ -59,9 +62,32 @@ void Translator::patch(int s) {
 	patch(std::to_string(s));
 }
 
-std::string Translator::get_temp_var() {
-	++offset;
-	return "tmp" + std::to_string((++tmp_index));
+void Translator::reset_temp_index() {
+	tmp_index = 0;
+}
+
+void Translator::next_instruction() {
+	instruction_count++;
+	tac->append("\n");
+}
+
+std::string Translator::get_temp_var(SymbolType type) {
+	int index;
+	if (tmp_index > max_tmp_index) {
+		max_tmp_index = tmp_index;
+		int off = symbolTable->nextOffset();
+
+		// add new temp variable to symbol table
+		Symbol *symbol = new Symbol("tmp" + tmp_index);
+		symbol->setOffset(off);
+		symbol->setSize(4);
+		symbol->setType(type);
+		index = symbolTable->addSymbol(symbol);
+	} else {
+		index = tmp_index;
+	}
+	++tmp_index;
+	return std::to_string(index);
 }
 
 std::string Translator::push(std::string s) {
@@ -75,10 +101,11 @@ std::string Translator::pop() {
 	return tmp;
 }
 
-int Translator::getOffset() {
-	return (offset++) * 4;
-}
-
 std::string * Translator::getStream() {
 	return tac;
+}
+
+void Translator::finalize() {
+	tac->insert(0, "\n");
+	tac->insert(0, std::to_string(symbolTable->nextOffset()));
 }
