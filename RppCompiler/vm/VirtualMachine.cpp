@@ -19,7 +19,7 @@ VirtualMachine::VirtualMachine(std::ifstream * file) {
 }
 
 VirtualMachine::~VirtualMachine() {
-	int size = instruction_memory.size();
+	unsigned int size = instruction_memory.size();
 	for (unsigned int i = 0; i < size; ++i) {
 		delete instruction_memory[i];
 	}
@@ -47,6 +47,59 @@ void VirtualMachine::execute() {
 			ds[dst] = op1;
 			break;
 		case LABEL:
+			break;
+		case SUB:
+			ds[dst] = ds[op1] - ds[op2];
+			break;
+		case MUL:
+			ds[dst] = ds[op1] * ds[op2];
+			break;
+		case DIV:
+			ds[dst] = ds[op1] / ds[op2];
+			break;
+		case MOV:
+			ds[dst] = ds[op1];
+			break;
+		case IF_GE_GOTO:
+			if (ds[dst] >= ds[op1]) {
+				ip = op2 - 1;
+			}
+			break;
+		case IF_LE_GOTO:
+			if (ds[dst] <= ds[op1]) {
+				ip = op2 - 1;
+			}
+			break;
+		case IF_L_GOTO:
+			if (ds[dst] < ds[op1]) {
+				ip = op2 - 1;
+			}
+			break;
+		case IF_G_GOTO:
+			if (ds[dst] > ds[op1]) {
+				ip = op2 - 1;
+			}
+			break;
+		case IF_E_GOTO:
+			if (ds[dst] == ds[op1]) {
+				ip = op2 - 1;
+			}
+			break;
+		case IF_NE_GOTO:
+			if (ds[dst] != ds[op1]) {
+				ip = op2 - 1;
+			}
+			break;
+		case GOTO:
+			ip = dst - 1;
+			break;
+		case PARAM:
+			break;
+		case MOV_TO_ARR:
+			ds[dst + ds[op1]] = ds[op2];
+			break;
+		case MOV_FROM_ARR:
+			ds[dst] = ds[op1 + ds[op2]];
 			break;
 		case RET:
 			return;

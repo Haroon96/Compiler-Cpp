@@ -62,8 +62,8 @@ void Translator::patch(int s) {
 	patch(std::to_string(s));
 }
 
-void Translator::reset_temp_index() {
-	tmp_index = 0;
+void Translator::reset_temp_index(int index) {
+	tmp_index = index;
 }
 
 void Translator::next_instruction() {
@@ -78,13 +78,13 @@ std::string Translator::get_temp_var(SymbolType type) {
 		int off = symbolTable->nextOffset();
 
 		// add new temp variable to symbol table
-		Symbol *symbol = new Symbol("tmp" + tmp_index);
+		Symbol *symbol = new Symbol("tmp" + std::to_string(tmp_index));
 		symbol->setOffset(off);
-		symbol->setSize(4);
+		symbol->setLength(1);
 		symbol->setType(type);
 		index = symbolTable->addSymbol(symbol);
 	} else {
-		index = tmp_index;
+		index = symbolTable->indexOf("tmp" + std::to_string(tmp_index));
 	}
 	++tmp_index;
 	return std::to_string(index);
@@ -107,5 +107,5 @@ std::string * Translator::getStream() {
 
 void Translator::finalize() {
 	tac->insert(0, "\n");
-	tac->insert(0, std::to_string(symbolTable->nextOffset()));
+	tac->insert(0, std::to_string(symbolTable->getLength()));
 }

@@ -42,7 +42,7 @@ private:
 	void variable_declaration();
 	void variable_initialization();
 	SymbolType data_type();
-	void statements();
+	void statements(int reset_point = 0);
 	void statement();
 	void print_statement();
 	void get_statement();

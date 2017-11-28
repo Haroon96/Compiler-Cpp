@@ -92,7 +92,7 @@ private:
 };
 
 struct Symbol {
-	Symbol(std::string name) :name(name), offset(-1), type(INT_VAR), size(0) {
+	Symbol(std::string name) :name(name), offset(-1), type(INT_VAR), length(0) {
 	}
 	void setOffset(int offset) {
 		this->offset = offset;
@@ -109,16 +109,16 @@ struct Symbol {
 	SymbolType getType() {
 		return type;
 	}
-	int getSize() {
-		return size;
+	int getLength() {
+		return length;
 	}
-	void setSize(int size) {
-		this->size = size;
+	void setLength(int length) {
+		this->length = length;
 	}
 private:
 	std::string name;
 	int offset;
-	int size;
+	int length;
 	SymbolType type;
 };
 
@@ -126,11 +126,12 @@ class SymbolTable {
 
 private:
 	std::vector<Symbol*> *symbolTable;
-
+	int offset;
 public:
 
 	SymbolTable() {
 		symbolTable = new std::vector<Symbol*>();
+		offset = 0;
 	}
 
 	int addSymbol(Symbol *symbol) {
@@ -146,15 +147,6 @@ public:
 		return (*symbolTable)[id];
 	}
 
-	Symbol* findByName(std::string name) {
-		int index = indexOf(name);
-		if (index == -1) {
-			return nullptr;
-		} else {
-			return (*symbolTable)[indexOf(name)];
-		}
-	}
-
 	int indexOf(std::string name) {
 		unsigned int size = symbolTable->size();
 		for (unsigned int i = 0; i < size; ++i) {
@@ -166,14 +158,24 @@ public:
 	}
 
 	int nextOffset() {
-		if (symbolTable->size() == 0) {
-			return 0;
-		} else {
-			Symbol *lastSymbol = (*symbolTable)[symbolTable->size() - 1];
-			return lastSymbol->getOffset() + 1;
+		int size = symbolTable->size();
+		if (size > 0) {
+			offset += (*symbolTable)[size - 1]->getLength();
 		}
+		return offset;
 	}
+
 	void removeSymbol(std::string id) {
 		symbolTable->erase(symbolTable->begin() + std::stoi(id));
 	}
+
+	int getLength() {
+		unsigned int size = symbolTable->size();
+		int length = 0;
+		for (unsigned int i = 0; i < size; ++i) {
+			length += (*symbolTable)[i]->getLength();
+		}
+		return length;
+	}
+
 };

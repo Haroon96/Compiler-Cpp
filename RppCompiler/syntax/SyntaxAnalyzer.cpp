@@ -155,17 +155,19 @@ void SyntaxAnalyzer::variable_declaration() {
 	
 	Symbol *symbol = symbolTable->getSymbol(lookahead->getLexeme());
 	symbol->setType(symbolType);
-	symbol->setSize(4);
 	symbol->setOffset(symbolTable->nextOffset());
+	symbol->setLength(1);
 
 	match(IDENTIFIER);
 
 	if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
 		variable_initialization();
-		translator->write_instruction(MOV, symbol->getOffset(), symbolTable->indexOf(translator->pop()));
+		translator->write_instruction(MOV, symbol->getOffset(), symbolTable->getSymbol(translator->pop())->getOffset());
+		translator->next_instruction();
 	} else if (lookahead->getToken() == L_SUBSCRIPT_OPERATOR) {
 		array_declaration();
-		symbol->setSize(std::stoi(translator->pop()));
+		symbol->setOffset(symbolTable->nextOffset());
+		symbol->setLength(std::stoi(translator->pop()));
 	}
 	
 	decrease_depth();
@@ -179,7 +181,7 @@ void SyntaxAnalyzer::variable_initialization() {
 }
 
 SymbolType SyntaxAnalyzer::data_type() {
-	translator->push(lookahead->getLexeme());
+//	translator->push(lookahead->getLexeme());
 	if (lookahead->getToken() == INT_TYPE) {
 		match(INT_TYPE);
 		return INT_VAR;
@@ -191,10 +193,11 @@ SymbolType SyntaxAnalyzer::data_type() {
 	}
 }
 
-void SyntaxAnalyzer::statements() {
+void SyntaxAnalyzer::statements(int reset_point) {
 	pad("Statement list");
 	increase_depth();
 	while (lookahead->getToken() != R_BRACE) {
+		translator->reset_temp_index(reset_point);
 		statement();
 	}
 	decrease_depth();
@@ -203,7 +206,6 @@ void SyntaxAnalyzer::statements() {
 void SyntaxAnalyzer::statement() {
 	pad("Statement");
 	increase_depth();
-	translator->reset_temp_index();
 	switch (lookahead->getToken()) {
 	case PRINT_STATEMENT:
 		print_statement();
@@ -286,10 +288,11 @@ void SyntaxAnalyzer::if_statement() {
 		translator->get_instruction_count() + 2
 	);
 
+	translator->next_instruction();
 	translator->write(GOTO);
 	translator->mark_patch();
-	translator->write(IGNORE);
-	translator->write(IGNORE);
+	translator->write(UNUSED);
+	translator->write(UNUSED);
 	translator->next_instruction();
 
 	if (lookahead->getToken() == L_BRACE) {
@@ -314,8 +317,8 @@ void SyntaxAnalyzer::else_statement() {
 	increase_depth();
 	translator->write(GOTO);
 	translator->mark_patch();
-	translator->write(IGNORE);
-	translator->write(IGNORE);
+	translator->write(UNUSED);
+	translator->write(UNUSED);
 	translator->next_instruction();
 	match(ELSE_STATEMENT);
 	if (lookahead->getToken() == L_BRACE) {
@@ -364,15 +367,16 @@ void SyntaxAnalyzer::while_statement() {
 		translator->get_instruction_count() + 2
 	);
 
+	translator->next_instruction();
 	translator->write(GOTO);
 	translator->mark_patch();
-	translator->write(IGNORE);
-	translator->write(IGNORE);
+	translator->write(UNUSED);
+	translator->write(UNUSED);
 	translator->next_instruction();
 
 	if (lookahead->getToken() == L_BRACE) {
 		match(L_BRACE);
-		statements();
+		statements(1);
 		match(R_BRACE);
 	} else {
 		statement();
@@ -621,6 +625,7 @@ void SyntaxAnalyzer::identifier_prefix_factors() {
 			symbolTable->getSymbol(translator->pop())->getOffset()
 		);
 		translator->next_instruction();
+		translator->push(tmp);
 
 	} else {
 		translator->push(id);

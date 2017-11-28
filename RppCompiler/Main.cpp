@@ -54,6 +54,31 @@ int main(int argc, char *argv[]) {
 
 		translator->finalize();
 
+
+		ofstream tree(filename + std::string(".tree.txt"));
+		ofstream tknlex(filename + std::string(".lex.txt"));
+		ofstream idTbl(filename + std::string(".lex_ids.txt"));
+		ofstream tac(filename + std::string(".mcode.txt"));
+
+		tree << syntax->getStream()->str() << endl;
+		tree << err.str() << std::endl;
+		tknlex << lex->getStream()->str() << std::endl;
+		tac << (*translator->getStream()) << std::endl;
+
+		tree.close();
+		tknlex.close();
+		idTbl.close();
+		src->close();
+
+
+		vm = new VirtualMachine(new ifstream(filename + std::string(".mcode.txt")));
+		vm->execute();
+
+		delete lex;
+		delete syntax;
+		delete src;
+		delete vm;
+
 	} catch (exception &e) {
 		err << "Error encountered on line " << lex->getLineNumber() << endl;
 		err << "Details: " << e.what() << endl;
@@ -67,29 +92,6 @@ int main(int argc, char *argv[]) {
 		std::cout << err.str() << std::endl;
 	}
 
-	ofstream tree(filename + std::string(".tree.txt"));
-	ofstream tknlex(filename + std::string(".lex.txt"));
-	ofstream idTbl(filename + std::string(".lex_ids.txt"));
-	ofstream tac(filename + std::string(".mcode.txt"));
-
-	tree << syntax->getStream()->str() << endl;
-	tree << err.str() << std::endl;
-	tknlex << lex->getStream()->str() << std::endl;
-	tac << (*translator->getStream()) << std::endl;
-
-	tree.close();
-	tknlex.close();
-	idTbl.close();
-	src->close();
-
-
-	vm = new VirtualMachine(new ifstream(filename + std::string(".mcode.txt")));
-	vm->execute();
-
-	delete lex;
-	delete syntax;
-	delete src;
-	delete vm;
 
 	return 0;
 }

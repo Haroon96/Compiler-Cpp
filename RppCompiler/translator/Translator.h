@@ -19,7 +19,7 @@ public:
 	void mark_patch();
 	void patch(std::string s);
 	void patch(int s);
-	void reset_temp_index();
+	void reset_temp_index(int index = 0);
 	void next_instruction();
 	void finalize();
 	std::string get_temp_var(SymbolType type = INT_VAR);
