@@ -57,7 +57,6 @@ int main(int argc, char *argv[]) {
 
 		ofstream tree(filename + std::string(".tree.txt"));
 		ofstream tknlex(filename + std::string(".lex.txt"));
-		ofstream idTbl(filename + std::string(".lex_ids.txt"));
 		ofstream tac(filename + std::string(".mcode.txt"));
 
 		tree << syntax->getStream()->str() << endl;
@@ -67,7 +66,6 @@ int main(int argc, char *argv[]) {
 
 		tree.close();
 		tknlex.close();
-		idTbl.close();
 		src->close();
 
 

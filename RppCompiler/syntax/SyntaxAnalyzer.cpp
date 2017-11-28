@@ -155,8 +155,8 @@ void SyntaxAnalyzer::variable_declaration() {
 	
 	Symbol *symbol = symbolTable->getSymbol(lookahead->getLexeme());
 	symbol->setType(symbolType);
-	symbol->setOffset(symbolTable->nextOffset());
 	symbol->setLength(1);
+	symbol->setOffset(symbolTable->nextOffset());
 
 	match(IDENTIFIER);
 
@@ -166,7 +166,6 @@ void SyntaxAnalyzer::variable_declaration() {
 		translator->next_instruction();
 	} else if (lookahead->getToken() == L_SUBSCRIPT_OPERATOR) {
 		array_declaration();
-		symbol->setOffset(symbolTable->nextOffset());
 		symbol->setLength(std::stoi(translator->pop()));
 	}
 	
@@ -238,8 +237,13 @@ void SyntaxAnalyzer::print_statement() {
 	pad("Print statement");
 	increase_depth();
 	match(PRINT_STATEMENT);
-	data_element();
-	translator->write_instruction(OUT, symbolTable->getSymbol(translator->pop())->getOffset());
+	if (lookahead->getToken() == LITERAL_CONSTANT) {
+		translator->write_instruction(CHAR_OUT, lookahead->getLexeme()[1]);
+		match(LITERAL_CONSTANT);
+	} else {
+		expression();
+		translator->write_instruction(OUT, symbolTable->getSymbol(translator->pop())->getOffset());
+	}
 	translator->next_instruction();
 	decrease_depth();
 }
@@ -249,9 +253,23 @@ void SyntaxAnalyzer::get_statement() {
 	match(GET_STATEMENT);
 
 	// add check for methods here
-	translator->write_instruction(IN, symbolTable->getSymbol(lookahead->getLexeme())->getOffset());
-	translator->next_instruction();
+	std::string id = lookahead->getLexeme();
 	match(IDENTIFIER);
+	if (lookahead->getToken() != L_SUBSCRIPT_OPERATOR) {
+		translator->write_instruction(IN, symbolTable->getSymbol(id)->getOffset());
+	} else {
+		match(L_SUBSCRIPT_OPERATOR);
+		expression();
+		match(R_SUBSCRIPT_OPERATOR);
+
+		translator->write_instruction(
+			ARR_IN,
+			symbolTable->getSymbol(id)->getOffset(),
+			symbolTable->getSymbol(translator->pop())->getOffset()
+		);
+
+	}
+	translator->next_instruction();
 	decrease_depth();
 }
 void SyntaxAnalyzer::if_statement() {
@@ -632,24 +650,12 @@ void SyntaxAnalyzer::identifier_prefix_factors() {
 	}
 }
 
-void SyntaxAnalyzer::data_element() {
-	if (lookahead->getToken() == LITERAL_CONSTANT) {
-		std::string tmp_var = translator->get_temp_var(CHAR_VAR);
-		translator->write(tmp_var);
-		translator->write(lookahead->getLexeme());
-		translator->push(tmp_var);
-		match(LITERAL_CONSTANT);
-	} else {
-		expression();
-	}
-}
-
 void SyntaxAnalyzer::boolean_expression() {
 	pad("Boolean expression");
 	increase_depth();
-	data_element();
+	expression();
 	relational_operator();
-	data_element();
+	expression();
 	decrease_depth();
 }
 

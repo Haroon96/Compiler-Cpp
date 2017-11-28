@@ -60,7 +60,9 @@ enum OpCode {
 	RET,
 	MOV_TO_ARR,
 	MOV_FROM_ARR,
+	ARR_IN,
 	LABEL,
+	CHAR_OUT,
 	UNUSED = -1
 };
 
@@ -159,8 +161,8 @@ public:
 
 	int nextOffset() {
 		int size = symbolTable->size();
-		if (size > 0) {
-			offset += (*symbolTable)[size - 1]->getLength();
+		if (size > 1) {
+			offset += (*symbolTable)[size - 2]->getLength();
 		}
 		return offset;
 	}

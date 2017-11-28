@@ -75,14 +75,13 @@ std::string Translator::get_temp_var(SymbolType type) {
 	int index;
 	if (tmp_index > max_tmp_index) {
 		max_tmp_index = tmp_index;
-		int off = symbolTable->nextOffset();
 
 		// add new temp variable to symbol table
 		Symbol *symbol = new Symbol("tmp" + std::to_string(tmp_index));
-		symbol->setOffset(off);
+		index = symbolTable->addSymbol(symbol);
+		symbol->setOffset(symbolTable->nextOffset());
 		symbol->setLength(1);
 		symbol->setType(type);
-		index = symbolTable->addSymbol(symbol);
 	} else {
 		index = symbolTable->indexOf("tmp" + std::to_string(tmp_index));
 	}

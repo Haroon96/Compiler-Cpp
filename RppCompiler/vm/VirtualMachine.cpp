@@ -103,6 +103,12 @@ void VirtualMachine::execute() {
 			break;
 		case RET:
 			return;
+		case ARR_IN:
+			std::cin >> ds[dst + ds[op1]];
+			break;
+		case CHAR_OUT:
+			std::cout << (char)dst << std::endl;
+			break;
 		}
 
 	}
