@@ -3,7 +3,8 @@
 #include "syntax\SyntaxAnalyzer.h"
 #include "translator\Translator.h"
 #include "vm\VirtualMachine.h"
-#include "compiler.h"
+#include "constants.h"
+#include "SymbolTable.h"
 using namespace std;
 
 bool verify(int argc, char *filename, ifstream *&src) {
@@ -46,7 +47,7 @@ int main(int argc, char *argv[]) {
 
 	try {
 		symbolTable = new SymbolTable();
-		lex = new LexicalAnalyzer(src, symbolTable);
+		lex = new LexicalAnalyzer(src);
 		translator = new Translator(symbolTable);
 		syntax = new SyntaxAnalyzer(lex, translator, symbolTable);
 

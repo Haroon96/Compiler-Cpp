@@ -1,15 +1,15 @@
 #include "LexicalAnalyzer.h"
 #include "automata.h"
 #include "util.h"
-#include "../compiler.h"
+#include "../constants.h"
+#include "../TokenLexeme.h"
 #include <sstream>
 
 const char *LexicalAnalyzer::padding = "                              ";
 
-LexicalAnalyzer::LexicalAnalyzer(std::ifstream * file, SymbolTable * symbolTable) {
+LexicalAnalyzer::LexicalAnalyzer(std::ifstream * file) {
 	this->file = file;
-	this->symbolTable = symbolTable;
-	this->lineNumber = 1;
+	this->line_no = 1;
 	this->tlStream = new std::ostringstream();
 }
 
@@ -64,7 +64,7 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 
 			// update line number
 			if (symbol == '\n') {
-				lineNumber++;
+				line_no++;
 			}
 
 			// feed symbol to all automata
@@ -113,21 +113,6 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 				file->seekg(-1, std::ios_base::cur);
 			}
 
-			// if lexeme is an identifier
-			if (token == IDENTIFIER) {
-				// locate in symbol table
-				int index = symbolTable->indexOf(lexeme);
-
-				// if found, reference it
-				if (index != -1) {
-					lexeme = std::to_string(index);
-				} else {
-					// else add it to symbol table
-					int new_index = symbolTable->addSymbol(new Symbol(lexeme));
-					lexeme = std::to_string(new_index);
-				}
-			}
-
 			// set token-lexeme variable to end loop
 			tokenLexeme = new TokenLexeme(token, lexeme);
 		}
@@ -139,7 +124,6 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 		*tlStream << (padding + tokenName.length());
 		*tlStream << tokenLexeme->getLexeme() << std::endl;
 	}
-	
 	return tokenLexeme;
 }
 
@@ -151,5 +135,5 @@ std::ostringstream * LexicalAnalyzer::getStream() {
 }
 
 int LexicalAnalyzer::getLineNumber() {
-	return lineNumber;
+	return line_no;
 }

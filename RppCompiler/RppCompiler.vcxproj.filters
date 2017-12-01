@@ -21,22 +21,28 @@
     <ClCompile Include="lex\automata.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lex\util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="lex\LexicalAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="syntax\SyntaxAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="compiler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="translator\Translator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="vm\VirtualMachine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SymbolTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lex\util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Symbol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="constants.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -46,9 +52,6 @@
     </ClInclude>
     <ClInclude Include="lex\util.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="lex\LexicalAnalyzer.h">
       <Filter>Source Files</Filter>
@@ -60,6 +63,18 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="vm\VirtualMachine.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SymbolTable.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Symbol.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenLexeme.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="constants.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

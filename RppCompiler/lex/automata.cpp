@@ -1,6 +1,6 @@
 #include "automata.h"
 #include "util.h"
-#include "../compiler.h"
+#include "../constants.h"
 
 Token automata::numeric_constants(char symbol, int & state) {
 	switch (state) {

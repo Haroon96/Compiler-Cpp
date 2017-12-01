@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 bool isDigit(char c);
 bool isLetter(char c);
 bool isOperator(char c);

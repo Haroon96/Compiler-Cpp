@@ -19,21 +19,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="constants.cpp" />
     <ClCompile Include="lex\automata.cpp" />
     <ClCompile Include="lex\LexicalAnalyzer.cpp" />
     <ClCompile Include="lex\util.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Symbol.cpp" />
+    <ClCompile Include="SymbolTable.cpp" />
     <ClCompile Include="syntax\SyntaxAnalyzer.cpp" />
     <ClCompile Include="translator\Translator.cpp" />
     <ClCompile Include="vm\VirtualMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="compiler.h" />
+    <ClInclude Include="constants.h" />
     <ClInclude Include="lex\automata.h" />
     <ClInclude Include="lex\LexicalAnalyzer.h" />
     <ClInclude Include="lex\util.h" />
+    <ClInclude Include="Symbol.h" />
+    <ClInclude Include="SymbolTable.h" />
     <ClInclude Include="syntax\SyntaxAnalyzer.h" />
+    <ClInclude Include="TokenLexeme.h" />
     <ClInclude Include="translator\Translator.h" />
     <ClInclude Include="vm\VirtualMachine.h" />
   </ItemGroup>

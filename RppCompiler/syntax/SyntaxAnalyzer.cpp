@@ -1,5 +1,8 @@
 ﻿#include "SyntaxAnalyzer.h"
-#include "../compiler.h"
+#include "../constants.h"
+#include "../SymbolTable.h"
+#include "../Symbol.h"
+#include "../TokenLexeme.h"
 
 SyntaxAnalyzer::SyntaxAnalyzer(LexicalAnalyzer * lex, Translator * translator, SymbolTable *symbolTable) {
 	this->lex = lex;

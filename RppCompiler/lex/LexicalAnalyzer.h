@@ -5,13 +5,11 @@
 #include <fstream>
 
 struct TokenLexeme;
-struct Symbol;
-class SymbolTable;
 
 class LexicalAnalyzer {
 public:
 
-	LexicalAnalyzer(std::ifstream *file, SymbolTable *symbolTable);
+	LexicalAnalyzer(std::ifstream *file);
 
 	TokenLexeme* nextToken();
 	bool hasNextToken();
@@ -19,11 +17,9 @@ public:
 	std::ostringstream* getStream();
 	int getLineNumber();
 private:
-
-	SymbolTable *symbolTable;
 	std::ifstream *file;
 	std::ostringstream *tlStream;
-	int lineNumber;
+	int line_no;
 
 	static const char *padding;
 };

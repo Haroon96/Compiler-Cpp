@@ -1,5 +1,7 @@
 #include "Translator.h"
-#include "../compiler.h"
+#include "../constants.h"
+#include "../Symbol.h"
+#include "../SymbolTable.h"
 #include <string>
 
 Translator::Translator(SymbolTable *symbolTable) {

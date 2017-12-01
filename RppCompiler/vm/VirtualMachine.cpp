@@ -1,5 +1,5 @@
 #include "VirtualMachine.h"
-#include "../compiler.h"
+#include "../constants.h"
 #include <iostream>
 
 VirtualMachine::VirtualMachine(std::ifstream * file) {

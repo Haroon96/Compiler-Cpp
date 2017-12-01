@@ -3,7 +3,9 @@
 #include <string>
 #include <sstream>
 #include <stack>
-#include "../compiler.h"
+#include "../constants.h"
+
+class SymbolTable;
 
 class Translator {
 public:
