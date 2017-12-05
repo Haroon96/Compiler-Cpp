@@ -17,7 +17,7 @@ public:
 	void write_label(std::string s);
 	void write(std::string s);
 	void write(int n);
-	void write_instruction(int op, int dst, int op1 = UNUSED, int op2 = UNUSED);
+	void write_instruction(int op, int dst = UNUSED, int op1 = UNUSED, int op2 = UNUSED);
 	void mark_patch();
 	void patch(std::string s);
 	void patch(int s);

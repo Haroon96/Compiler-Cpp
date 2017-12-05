@@ -1,0 +1,13 @@
+def add(int x, int y) { return x + y }
+def sub(int x, int y) { return x - y }
+def mul(int x, int y) { return x * y }
+def div(int x, int y) { return x / y }
+def main() {
+	int a,b
+	gets a
+	gets b
+	print add(a,b)
+	print sub(a,b)
+	print mul(a,b)
+	print div(a,b)
+}

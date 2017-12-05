@@ -37,14 +37,10 @@ enum Token {
 enum SymbolType {
 	METHOD,
 	INT_VAR,
-	CHAR_VAR
-};
-
-enum ParameterType {
-	INTEGER,
-	INTEGER_ARRAY,
-	CHARACTER,
-	CHARACTER_ARRAY
+	CHAR_VAR,
+	INT_ARR,
+	CHAR_ARR,
+	VOID
 };
 
 enum OpCode {
@@ -71,11 +67,14 @@ enum OpCode {
 	CHAR_OUT,
 	CALL,
 	ALLOC,
-	UNUSED = -1
+	UNUSED,
+	CALL_CLEANUP,
+	CALL_CLEANUP_NO_RESULT,
+	EXIT
 };
 
 enum Scope {
-	GLOBAL = 0x1 << 31,
+	GLOBAL = 0x1 << 30,
 	LOCAL = 0
 };
 

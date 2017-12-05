@@ -5,9 +5,12 @@
 
 struct MethodSymbol : Symbol {
 public:
-	MethodSymbol(std::string lexeme) :Symbol(lexeme) {}
-	void addParam(ParameterType pt);
+	MethodSymbol(std::string lexeme) :Symbol(lexeme) {
+		setType(METHOD);
+	}
+	void addParam(SymbolType pt);
+	std::vector<SymbolType> getParams();
 	int getLength();
 private:
-	std::vector<ParameterType> params;
+	std::vector<SymbolType> params;
 };

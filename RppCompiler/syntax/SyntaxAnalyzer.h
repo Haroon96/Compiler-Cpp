@@ -12,7 +12,6 @@ struct MethodSymbol;
 class SyntaxAnalyzer {
 
 public:
-
 	SyntaxAnalyzer(LexicalAnalyzer* lex, Translator *translator);
 	~SyntaxAnalyzer();
 	int getLineNumber();
@@ -24,7 +23,7 @@ private:
 	LexicalAnalyzer* lex;
 	Translator* translator;
 	SymbolTable *curr_scope;
-	SymbolTable *globalSymbolTable;
+	SymbolTable *global_scope;
 	TokenLexeme* lookahead;
 
 	int depth;
@@ -35,8 +34,8 @@ private:
 
 	void pad(std::string);
 	bool match(Token);
-	Symbol *locateSymbol();
-	Symbol *locateSymbol(Scope& scope);
+	Symbol* locateSymbol(std::string lexeme);
+	MethodSymbol *locateMethod(std::string lexeme);
 
 	void increase_depth();
 	void decrease_depth();
@@ -47,7 +46,7 @@ private:
 	// may throw exceptions
 	void start();
 	void function_declaration();
-	void parameters(MethodSymbol *symbol);
+	int parameters(MethodSymbol *symbol);
 	void variable_declaration();
 	void variable_declaration_list(SymbolType type);
 	void global_variable_declaration();
@@ -63,7 +62,7 @@ private:
 	void while_statement();
 	void return_statement();
 	void identifier_prefix_statements();
-	int method_call(MethodSymbol *symbol);
+	void method_call(MethodSymbol *symbol);
 	void assignment();
 	void expression();
 	void expression_p();

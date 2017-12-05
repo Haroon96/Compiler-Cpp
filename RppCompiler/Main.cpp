@@ -23,7 +23,6 @@ bool verify(int argc, char *filename, ifstream *&src) {
 	return true;
 }
 
-
 std::string OpCodeReadable[] = {
 	"ADD",
 	"SUB",
@@ -48,9 +47,29 @@ std::string OpCodeReadable[] = {
 	"CHAR_OUT",
 	"CALL",
 	"ALLOC",
-	"UNUSED"
+	"UNUSED",
+	"CALL_CLEANUP",
+	"CALL_CLEANUP_NO_RESULT",
+	"EXIT"
 };
 
+void print_friendly(std::string in_file, std::string out_file) {
+	ifstream in(in_file);
+	ofstream out(out_file);
+	int op, d, s, t;
+	in >> op;
+	while (!in.eof()) {
+		in >> op >> d >> s >> t;
+		if (!in.eof()) {
+			out << OpCodeReadable[op] << " ";
+			out << d << " ";
+			out << s << " ";
+			out << t << endl;
+		}
+	}
+	in.close();
+	out.close();
+}
 
 int main(int argc, char *argv[]) {
 
@@ -62,16 +81,16 @@ int main(int argc, char *argv[]) {
 	std::ostringstream err;
 	ifstream *src;
 
-	// test code. remove from production.
-	char* filename = "test.txt";
-	argc = 2;
-	// -------------------------
-	
-	//char* filename = argv[1];
+	char* filename = argv[1];
 
 	if (!verify(argc, filename, src)) {
 		return 1;
 	}
+
+	std::string tree_out = filename + std::string(".tree.txt");
+	std::string lex_out = filename + std::string(".lex.txt");
+	std::string machine_code_out = filename + std::string(".mcode.txt");
+	std::string friendly_code_out = filename + std::string(".fcode.txt");
 
 	try {
 		lex = new LexicalAnalyzer(src);
@@ -80,39 +99,24 @@ int main(int argc, char *argv[]) {
 
 		syntax->parse();
 
-		ofstream tree(filename + std::string(".tree.txt"));
-		ofstream tknlex(filename + std::string(".lex.txt"));
-		ofstream tac(filename + std::string(".mcode.txt"));
+		ofstream tree(tree_out);
+		ofstream tknlex(lex_out);
+		ofstream mc(machine_code_out);
 
 		tree << syntax->getStream()->str() << endl;
 		tree << err.str() << std::endl;
 		tknlex << lex->getStream()->str() << std::endl;
-		tac << (*translator->getStream()) << std::endl;
+		mc << (*translator->getStream()) << std::endl;
+		print_friendly(machine_code_out, friendly_code_out);
 
 		tree.close();
 		tknlex.close();
+		mc.close();
 		src->close();
-
-
-		ifstream file(filename + std::string(".mcode.txt"));
-
-		int op, d, s, t;
-		file >> op;
-		while (!file.eof()) {
-			file >> op >> d >> s >> t;
-			std::cout << OpCodeReadable[op] << " ";
-			std::cout << d << " ";
-			std::cout << s << " ";
-			std::cout << t << std::endl;
-		}
-
-		//vm = new VirtualMachine(new ifstream(filename + std::string(".mcode.txt")));
-		//vm->execute();
 
 		delete lex;
 		delete syntax;
 		delete src;
-		delete vm;
 
 	} catch (exception &e) {
 		err << "Error encountered on line " << lex->getLineNumber() << endl;
@@ -122,12 +126,15 @@ int main(int argc, char *argv[]) {
 	bool errorOccurred = (err.str().length() == 0);
 
 	if (errorOccurred) {
-		std::cout << "Compiled successfully." << std::endl;
+		std::cout << "Compiled successfully. Running." << std::endl;
+		vm = new VirtualMachine(new ifstream(machine_code_out));
+		vm->execute();
 	} else {
 		std::cout << err.str() << std::endl;
 	}
 
 
+	delete vm;
 	return 0;
 }
 

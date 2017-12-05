@@ -82,7 +82,6 @@ std::string Translator::get_temp_var(SymbolType type, SymbolTable *curr_scope) {
 	std::string name = "$temp" + std::to_string(tmp_index);
 	if (tmp_index > max_tmp_index) {
 		max_tmp_index = tmp_index;
-
 		// add new temp variable to symbol table
 		Symbol *symbol = new Symbol(name);
 		curr_scope->addSymbol(symbol);
@@ -113,4 +112,15 @@ std::string * Translator::getStream() {
 void Translator::finalize(SymbolTable *globalSymbolTable) {
 	tac->insert(0, "\n");
 	tac->insert(0, std::to_string(globalSymbolTable->getLength()));
+
+	Symbol *main = globalSymbolTable->getSymbol("main");
+
+	write_instruction(CALL, main->getOffset());
+	next_instruction();
+
+	write_instruction(CALL_CLEANUP_NO_RESULT, main->getLength());
+	next_instruction();
+
+	write_instruction(EXIT);
+	next_instruction();
 }

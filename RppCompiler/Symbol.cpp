@@ -10,7 +10,9 @@ Symbol::Symbol(std::string name) {
 
 void Symbol::setOffset(int offset) {
 	this->offset = offset;
-}	void Symbol::setType(SymbolType type) {
+}	
+
+void Symbol::setType(SymbolType type) {
 	this->type = type;
 }
 
