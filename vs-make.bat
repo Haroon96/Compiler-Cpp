@@ -1,0 +1,1 @@
+@start devenv RppCompiler.sln /build
