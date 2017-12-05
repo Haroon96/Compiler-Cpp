@@ -2,10 +2,10 @@
 #include "../constants.h"
 #include "../Symbol.h"
 #include "../SymbolTable.h"
+#include <sstream>
 #include <string>
 
-Translator::Translator(SymbolTable *symbolTable) {
-	this->symbolTable = symbolTable; 
+Translator::Translator() {
 	tac = new std::string();
 	patch_marks = new std::stack<int>();
 	stack = new std::stack<std::string>();
@@ -39,7 +39,7 @@ void Translator::write(int n) {
 	write(std::to_string(n));
 }
 
-void Translator::write_instruction(OpCode op, int dst, int op1, int op2) {
+void Translator::write_instruction(int op, int dst, int op1, int op2) {
 	write(op);
 	write(dst);
 	write(op1);
@@ -64,6 +64,11 @@ void Translator::patch(int s) {
 	patch(std::to_string(s));
 }
 
+void Translator::reset_temp_vars() {
+	reset_temp_index();
+	max_tmp_index = -1;
+}
+
 void Translator::reset_temp_index(int index) {
 	tmp_index = index;
 }
@@ -73,22 +78,21 @@ void Translator::next_instruction() {
 	tac->append("\n");
 }
 
-std::string Translator::get_temp_var(SymbolType type) {
-	int index;
+std::string Translator::get_temp_var(SymbolType type, SymbolTable *curr_scope) {
+	std::string name = "$temp" + std::to_string(tmp_index);
 	if (tmp_index > max_tmp_index) {
 		max_tmp_index = tmp_index;
 
 		// add new temp variable to symbol table
-		Symbol *symbol = new Symbol("tmp" + std::to_string(tmp_index));
-		index = symbolTable->addSymbol(symbol);
-		symbol->setOffset(symbolTable->nextOffset());
+		Symbol *symbol = new Symbol(name);
+		curr_scope->addSymbol(symbol);
+		symbol->setOffset(curr_scope->nextOffset());
 		symbol->setLength(1);
 		symbol->setType(type);
-	} else {
-		index = symbolTable->indexOf("tmp" + std::to_string(tmp_index));
 	}
+
 	++tmp_index;
-	return std::to_string(index);
+	return name;
 }
 
 std::string Translator::push(std::string s) {
@@ -106,7 +110,7 @@ std::string * Translator::getStream() {
 	return tac;
 }
 
-void Translator::finalize() {
+void Translator::finalize(SymbolTable *globalSymbolTable) {
 	tac->insert(0, "\n");
-	tac->insert(0, std::to_string(symbolTable->getLength()));
+	tac->insert(0, std::to_string(globalSymbolTable->getLength()));
 }

@@ -12,7 +12,7 @@ public:
 	std::string getName();
 	int getOffset();
 	SymbolType getType();
-	int getLength();
+	virtual int getLength();
 	void setLength(int length);
 
 private:

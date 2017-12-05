@@ -23,9 +23,37 @@ bool verify(int argc, char *filename, ifstream *&src) {
 	return true;
 }
 
+
+std::string OpCodeReadable[] = {
+	"ADD",
+	"SUB",
+	"MUL",
+	"DIV",
+	"MOV",
+	"OUT",
+	"IN",
+	"IF_GE_GOTO",
+	"IF_LE_GOTO",
+	"IF_L_GOTO",
+	"IF_G_GOTO",
+	"IF_E_GOTO",
+	"IF_NE_GOTO",
+	"GOTO",
+	"PARAM",
+	"SET",
+	"RET",
+	"MOV_TO_ARR",
+	"MOV_FROM_ARR",
+	"LABEL",
+	"CHAR_OUT",
+	"CALL",
+	"ALLOC",
+	"UNUSED"
+};
+
+
 int main(int argc, char *argv[]) {
 
-	SymbolTable *symbolTable = nullptr;
 	LexicalAnalyzer *lex = nullptr;
 	SyntaxAnalyzer *syntax = nullptr;
 	Translator *translator = nullptr;
@@ -46,15 +74,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	try {
-		symbolTable = new SymbolTable();
 		lex = new LexicalAnalyzer(src);
-		translator = new Translator(symbolTable);
-		syntax = new SyntaxAnalyzer(lex, translator, symbolTable);
+		translator = new Translator();
+		syntax = new SyntaxAnalyzer(lex, translator);
 
 		syntax->parse();
-
-		translator->finalize();
-
 
 		ofstream tree(filename + std::string(".tree.txt"));
 		ofstream tknlex(filename + std::string(".lex.txt"));
@@ -70,8 +94,20 @@ int main(int argc, char *argv[]) {
 		src->close();
 
 
-		vm = new VirtualMachine(new ifstream(filename + std::string(".mcode.txt")));
-		vm->execute();
+		ifstream file(filename + std::string(".mcode.txt"));
+
+		int op, d, s, t;
+		file >> op;
+		while (!file.eof()) {
+			file >> op >> d >> s >> t;
+			std::cout << OpCodeReadable[op] << " ";
+			std::cout << d << " ";
+			std::cout << s << " ";
+			std::cout << t << std::endl;
+		}
+
+		//vm = new VirtualMachine(new ifstream(filename + std::string(".mcode.txt")));
+		//vm->execute();
 
 		delete lex;
 		delete syntax;

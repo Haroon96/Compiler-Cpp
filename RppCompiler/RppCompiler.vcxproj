@@ -24,6 +24,7 @@
     <ClCompile Include="lex\LexicalAnalyzer.cpp" />
     <ClCompile Include="lex\util.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MethodSymbol.cpp" />
     <ClCompile Include="Symbol.cpp" />
     <ClCompile Include="SymbolTable.cpp" />
     <ClCompile Include="syntax\SyntaxAnalyzer.cpp" />
@@ -35,6 +36,7 @@
     <ClInclude Include="lex\automata.h" />
     <ClInclude Include="lex\LexicalAnalyzer.h" />
     <ClInclude Include="lex\util.h" />
+    <ClInclude Include="MethodSymbol.h" />
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="SymbolTable.h" />
     <ClInclude Include="syntax\SyntaxAnalyzer.h" />

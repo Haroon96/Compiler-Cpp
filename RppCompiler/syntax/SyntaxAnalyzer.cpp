@@ -2,15 +2,21 @@
 #include "../constants.h"
 #include "../SymbolTable.h"
 #include "../Symbol.h"
+#include "../MethodSymbol.h"
 #include "../TokenLexeme.h"
 
-SyntaxAnalyzer::SyntaxAnalyzer(LexicalAnalyzer * lex, Translator * translator, SymbolTable *symbolTable) {
+SyntaxAnalyzer::SyntaxAnalyzer(LexicalAnalyzer * lex, Translator * translator) {
 	this->lex = lex;
 	this->translator = translator;
-	this->symbolTable = symbolTable;
 	this->lookahead = nullptr;
 	this->depth = 0;
 	this->stream = new std::ostringstream();
+	this->globalSymbolTable = new SymbolTable();
+	this->curr_scope = globalSymbolTable;
+}
+
+SyntaxAnalyzer::~SyntaxAnalyzer() {
+	delete globalSymbolTable;
 }
 
 int SyntaxAnalyzer::getLineNumber() {
@@ -20,15 +26,14 @@ int SyntaxAnalyzer::getLineNumber() {
 // may throw exception
 void SyntaxAnalyzer::parse() {
 
-	lookahead = lex->nextToken();
-	
-	/*
-	translator->write(GOTO);
+	translator->write(CALL);
 	translator->mark_patch();
 	translator->write(UNUSED);
 	translator->write(UNUSED);
 	translator->next_instruction();
-	*/
+
+	lookahead = lex->nextToken();
+
 	if (lookahead == nullptr) {
 		throw std::exception("An error occured while parsing the file. No tokens found.");
 	}
@@ -37,18 +42,25 @@ void SyntaxAnalyzer::parse() {
 		start();
 	}
 
-	/*
-	int index = symbolTable->indexOf("main");
-	if (index == -1) {
+	Symbol *symbol = globalSymbolTable->getSymbol("main");
+	if (symbol == nullptr) {
 		throw std::exception("No main method found");
 	}
-	Symbol *symbol = symbolTable->getSymbol(std::to_string(index));
 	translator->patch(symbol->getOffset());
-	*/
+	translator->finalize(globalSymbolTable);
 }
 
 std::ostringstream* SyntaxAnalyzer::getStream() {
 	return stream;
+}
+
+void SyntaxAnalyzer::start_new_scope() {
+	this->curr_scope = new SymbolTable();
+}
+
+void SyntaxAnalyzer::end_of_scope() {
+	delete curr_scope;
+	curr_scope = globalSymbolTable;
 }
 
 void SyntaxAnalyzer::pad(std::string name) {
@@ -63,9 +75,9 @@ bool SyntaxAnalyzer::match(Token token) {
 		throw std::exception(std::string("Expected " + getTokenName(token) + " but encountered " + getTokenName(lookahead->getToken()) + " instead").c_str());
 	}
 	if (token == IDENTIFIER) {
-		Symbol* symbol = symbolTable->getSymbol(lookahead->getLexeme());
-		if (symbol->getOffset() == -1) {
-			throw std::exception(("Undeclared variable " + symbol->getName()).c_str());
+		Symbol* symbol = locateSymbol();
+		if (symbol == nullptr || symbol->getOffset() == -1) {
+			throw std::exception(("Undeclared identifier " + symbol->getName()).c_str());
 		}
 	}
 	pad(lookahead->getLexeme());
@@ -74,6 +86,22 @@ bool SyntaxAnalyzer::match(Token token) {
 	}
 	lookahead = lex->nextToken();
 	return true;
+}
+
+Symbol * SyntaxAnalyzer::locateSymbol() {
+	Scope scope;
+	return locateSymbol(scope);
+}
+
+Symbol * SyntaxAnalyzer::locateSymbol(Scope & scope) {
+	// if global scope or symbol not found locally, look in global scope
+	Symbol *symbol = nullptr;
+	scope = LOCAL;
+	if (curr_scope == nullptr || (symbol = curr_scope->getSymbol(lookahead->getLexeme())) == nullptr) {
+		symbol = globalSymbolTable->getSymbol(lookahead->getLexeme());
+		scope = GLOBAL;
+	}
+	return symbol;
 }
 
 void SyntaxAnalyzer::increase_depth() {
@@ -99,10 +127,12 @@ void SyntaxAnalyzer::start() {
 	increase_depth();
 	if (lookahead->getToken() == DEF_STATEMENT) {
 		pad("Function declaration");
+		start_new_scope();
+		translator->reset_temp_vars();
 		function_declaration();
 	} else if (lookahead->getToken() == INT_TYPE || lookahead->getToken() == CHAR_TYPE) {
 		pad("Variable declaration");
-		variable_declaration();
+		global_variable_declaration();
 	} else {
 		throw std::exception("Expected variable or function declaration");
 	}
@@ -113,20 +143,22 @@ void SyntaxAnalyzer::function_declaration() {
 	increase_depth();
 	match(DEF_STATEMENT);
 
-	translator->write_label(lookahead->getLexeme());
+	std::string lexeme = lookahead->getLexeme();
+
+	MethodSymbol *symbol = new MethodSymbol(lexeme);
+	symbol->setOffset(translator->get_instruction_count());
+	int index = globalSymbolTable->addSymbol(symbol);
+
+	translator->write_instruction(LABEL, index);
 	translator->next_instruction();
 
-	// fix this chaipi
-	std::string lexeme = lookahead->getLexeme();
-	symbolTable->getSymbol(lexeme)->setOffset(0);
 	match(IDENTIFIER);
-	symbolTable->removeSymbol(lexeme);
 
 	match(L_PARENTHESES);
 	
 	pad("Parameters");
 	increase_depth();
-	parameters();
+	parameters(symbol);
 	decrease_depth();
 
 	match(R_PARENTHESES);
@@ -137,18 +169,45 @@ void SyntaxAnalyzer::function_declaration() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::parameters() {
-	/*
-	while (lookahead->getToken() != R_PARENTHESES) {
-		pad("Parameter");
-		variable_declaration();
-		//translator->write(translator->pop());
-		if (lookahead->getToken() == COMMA) {
-		//	translator->write(",");
-			match(COMMA);
+void SyntaxAnalyzer::parameters(MethodSymbol *symbol) {
+
+	if (lookahead->getToken() == R_PARENTHESES) {
+		return;
+	}
+
+	bool is_array;
+	pad("Parameter");
+	is_array = false;
+
+	SymbolType symbolType = data_type();
+
+	match(IDENTIFIER);
+
+	if (lookahead->getToken() == L_SUBSCRIPT_OPERATOR) {
+		match(L_SUBSCRIPT_OPERATOR);
+		match(R_SUBSCRIPT_OPERATOR);
+		is_array = true;
+	}
+
+	if (is_array) {
+		if (symbolType == INT_VAR) {
+			symbol->addParam(INTEGER_ARRAY);
+		} else {
+			symbol->addParam(CHARACTER_ARRAY);
+		}
+	} else {
+		if (symbolType == INT_VAR) {
+			symbol->addParam(INTEGER);
+		} else {
+			symbol->addParam(CHARACTER);
 		}
 	}
-	*/
+
+	if (lookahead->getToken() == COMMA) {
+		match(COMMA);
+		parameters(symbol);
+	}
+
 }
 
 void SyntaxAnalyzer::variable_declaration() {
@@ -158,17 +217,68 @@ void SyntaxAnalyzer::variable_declaration() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::variable_declaration_list(SymbolType symbolType) {
-	Symbol *symbol = symbolTable->getSymbol(lookahead->getLexeme());
-	symbol->setType(symbolType);
+void SyntaxAnalyzer::variable_declaration_list(SymbolType type) {
+
+	std::string lexeme = lookahead->getLexeme();
+
+	Symbol *symbol = new Symbol(lexeme);
+
+	curr_scope->addSymbol(symbol);
+
+	symbol->setType(type);
 	symbol->setLength(1);
-	symbol->setOffset(symbolTable->nextOffset());
+	symbol->setOffset(curr_scope->nextOffset());
+
+	match(IDENTIFIER);
+
+	translator->write(ALLOC);
+	translator->write(symbol->getOffset());
+	translator->mark_patch();
+	translator->write(UNUSED);
+	translator->next_instruction();
+
+	if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
+		variable_initialization();
+		translator->write_instruction(MOV, symbol->getOffset() | LOCAL, curr_scope->getSymbol(translator->pop())->getOffset() | LOCAL);
+		translator->next_instruction();
+	} else if (lookahead->getToken() == L_SUBSCRIPT_OPERATOR) {
+		array_declaration();
+		symbol->setLength(std::stoi(translator->pop()));
+	}
+
+	translator->patch(symbol->getLength());
+
+	if (lookahead->getToken() == COMMA) {
+		match(COMMA);
+		variable_declaration_list(type);
+	}
+
+}
+
+void SyntaxAnalyzer::global_variable_declaration() {
+	increase_depth();
+	SymbolType symbolType = data_type();
+	global_variable_declaration_list(symbolType);
+	decrease_depth();
+}
+
+void SyntaxAnalyzer::global_variable_declaration_list(SymbolType type) {
+
+	std::string lexeme = lookahead->getLexeme();
+
+	Symbol *symbol = new Symbol(lexeme);
+	
+	globalSymbolTable->addSymbol(symbol);
+	
+	symbol->setType(type);
+	symbol->setLength(1);
+	symbol->setOffset(globalSymbolTable->nextOffset());
 
 	match(IDENTIFIER);
 
 	if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
 		variable_initialization();
-		translator->write_instruction(MOV, symbol->getOffset(), symbolTable->getSymbol(translator->pop())->getOffset());
+		translator->write_instruction(MOV, symbol->getOffset() | GLOBAL, globalSymbolTable->getSymbol(translator->pop())->getOffset() | GLOBAL);
 		translator->next_instruction();
 	} else if (lookahead->getToken() == L_SUBSCRIPT_OPERATOR) {
 		array_declaration();
@@ -177,9 +287,8 @@ void SyntaxAnalyzer::variable_declaration_list(SymbolType symbolType) {
 	
 	if (lookahead->getToken() == COMMA) {
 		match(COMMA);
-		variable_declaration_list(symbolType);
+		global_variable_declaration_list(type);
 	}
-
 }
 
 void SyntaxAnalyzer::variable_initialization() {
@@ -251,7 +360,7 @@ void SyntaxAnalyzer::print_statement() {
 		match(LITERAL_CONSTANT);
 	} else {
 		expression();
-		translator->write_instruction(OUT, symbolTable->getSymbol(translator->pop())->getOffset());
+		translator->write_instruction(OUT, curr_scope->getSymbol(translator->pop())->getOffset());
 	}
 	translator->next_instruction();
 	decrease_depth();
@@ -265,16 +374,21 @@ void SyntaxAnalyzer::get_statement() {
 	std::string id = lookahead->getLexeme();
 	match(IDENTIFIER);
 	if (lookahead->getToken() != L_SUBSCRIPT_OPERATOR) {
-		translator->write_instruction(IN, symbolTable->getSymbol(id)->getOffset());
+		translator->write_instruction(IN, curr_scope->getSymbol(id)->getOffset());
 	} else {
+		std::string tmp = translator->get_temp_var(INT_VAR, curr_scope);
+		translator->write_instruction(IN, curr_scope->getSymbol(tmp)->getOffset());
+		translator->next_instruction();
+
 		match(L_SUBSCRIPT_OPERATOR);
 		expression();
 		match(R_SUBSCRIPT_OPERATOR);
 
 		translator->write_instruction(
-			ARR_IN,
-			symbolTable->getSymbol(id)->getOffset(),
-			symbolTable->getSymbol(translator->pop())->getOffset()
+			MOV_TO_ARR,
+			curr_scope->getSymbol(id)->getOffset(),
+			curr_scope->getSymbol(translator->pop())->getOffset(),
+			curr_scope->getSymbol(tmp)->getOffset()
 		);
 
 	}
@@ -310,8 +424,8 @@ void SyntaxAnalyzer::if_statement() {
 
 	translator->write_instruction(
 		opcode,
-		symbolTable->getSymbol(op1)->getOffset(),
-		symbolTable->getSymbol(op2)->getOffset(),
+		curr_scope->getSymbol(op1)->getOffset(),
+		curr_scope->getSymbol(op2)->getOffset(),
 		translator->get_instruction_count() + 2
 	);
 
@@ -389,8 +503,8 @@ void SyntaxAnalyzer::while_statement() {
 
 	translator->write_instruction(
 		opcode,
-		symbolTable->getSymbol(op1)->getOffset(),
-		symbolTable->getSymbol(op2)->getOffset(),
+		curr_scope->getSymbol(op1)->getOffset(),
+		curr_scope->getSymbol(op2)->getOffset(),
 		translator->get_instruction_count() + 2
 	);
 
@@ -419,7 +533,7 @@ void SyntaxAnalyzer::return_statement() {
 	if (lookahead->getToken() == RETURN_STATEMENT) {
 		match(RETURN_STATEMENT);
 		expression();
-		translator->write_instruction(RET, symbolTable->getSymbol(translator->pop())->getOffset());
+		translator->write_instruction(RET, curr_scope->getSymbol(translator->pop())->getOffset());
 	} else {
 		translator->write_instruction(RET, 0);
 	}
@@ -427,7 +541,12 @@ void SyntaxAnalyzer::return_statement() {
 	decrease_depth();
 }
 void SyntaxAnalyzer::identifier_prefix_statements() {
-	std::string id = lookahead->getLexeme();
+	std::string name = lookahead->getLexeme();
+
+	Scope scope;
+
+	Symbol *symbol = locateSymbol(scope);
+	
 	match(IDENTIFIER);
 	if (lookahead->getToken() == L_PARENTHESES) {
 		/*int params = method_call();
@@ -458,23 +577,22 @@ void SyntaxAnalyzer::identifier_prefix_statements() {
 
 		translator->write_instruction(
 			MOV_TO_ARR,
-			symbolTable->getSymbol(id)->getOffset(),
-			symbolTable->getSymbol(translator->pop())->getOffset(),
-			symbolTable->getSymbol(result)->getOffset()
+			symbol->getOffset(),
+			curr_scope->getSymbol(translator->pop())->getOffset(),
+			curr_scope->getSymbol(result)->getOffset()
 		);
 		translator->next_instruction();
 	} else if (lookahead->getToken() == ASSIGNMENT_OPERATOR) {
 		assignment();
 		translator->write_instruction(
-			MOV,
-			symbolTable->getSymbol(id)->getOffset(),
-			symbolTable->getSymbol(translator->pop())->getOffset()
+			MOV ^ scope,
+			symbol->getOffset(),
+			curr_scope->getSymbol(translator->pop())->getOffset()
 		);
 		translator->next_instruction();
 	}
 }
-int SyntaxAnalyzer::method_call() {
-	/*
+int SyntaxAnalyzer::method_call(MethodSymbol *symbol) {
 	pad("Function call");
 	increase_depth();
 	match(L_PARENTHESES);
@@ -492,8 +610,6 @@ int SyntaxAnalyzer::method_call() {
 	match(R_PARENTHESES);
 	decrease_depth();
 	return param_count;
-	*/
-	return 0;
 }
 void SyntaxAnalyzer::assignment() {
 	pad("Assignment");
@@ -521,7 +637,7 @@ void SyntaxAnalyzer::expression_p() {
 		term();
 		expression_p();
 
-		std::string tmp = translator->get_temp_var();
+		std::string tmp = translator->get_temp_var(INT_VAR, curr_scope);
 
 		std::string operand2 = translator->pop();
 		std::string operand1 = translator->pop();
@@ -535,9 +651,9 @@ void SyntaxAnalyzer::expression_p() {
 
 		translator->write_instruction(
 			opcode,
-			symbolTable->getSymbol(tmp)->getOffset(),
-			symbolTable->getSymbol(operand1)->getOffset(),
-			symbolTable->getSymbol(operand2)->getOffset()
+			curr_scope->getSymbol(tmp)->getOffset(),
+			curr_scope->getSymbol(operand1)->getOffset(),
+			curr_scope->getSymbol(operand2)->getOffset()
 		);
 		translator->next_instruction();
 		translator->push(tmp);
@@ -562,7 +678,7 @@ void SyntaxAnalyzer::term_p() {
 		factor();
 		term_p();
 
-		std::string tmp = translator->get_temp_var();
+		std::string tmp = translator->get_temp_var(INT_VAR, curr_scope);
 
 		std::string operand2 = translator->pop();
 		std::string operand1 = translator->pop();
@@ -576,9 +692,9 @@ void SyntaxAnalyzer::term_p() {
 
 		translator->write_instruction(
 			opcode,
-			symbolTable->getSymbol(tmp)->getOffset(),
-			symbolTable->getSymbol(operand1)->getOffset(),
-			symbolTable->getSymbol(operand2)->getOffset()
+			curr_scope->getSymbol(tmp)->getOffset(),
+			curr_scope->getSymbol(operand1)->getOffset(),
+			curr_scope->getSymbol(operand2)->getOffset()
 		);
 		translator->next_instruction();
 
@@ -593,10 +709,10 @@ void SyntaxAnalyzer::factor() {
 	if (lookahead->getToken() == IDENTIFIER) {
 		identifier_prefix_factors();
 	} else if (lookahead->getToken() == NUMERIC_CONSTANT) {
-		std::string tmp_var = translator->get_temp_var();
+		std::string tmp_var = translator->get_temp_var(INT_VAR, curr_scope);
 		translator->write_instruction(
 			SET,
-			symbolTable->getSymbol(tmp_var)->getOffset(),
+			curr_scope->getSymbol(tmp_var)->getOffset(),
 			std::stoi(lookahead->getLexeme())
 		);
 		translator->next_instruction();
@@ -616,11 +732,15 @@ void SyntaxAnalyzer::factor() {
 }
 
 void SyntaxAnalyzer::identifier_prefix_factors() {
-	std::string id = lookahead->getLexeme();
+	std::string name = lookahead->getLexeme();
+	Scope scope;
+	Symbol *symbol = locateSymbol(scope);
 	match(IDENTIFIER);
 	if (lookahead->getToken() == L_PARENTHESES) {
-		/*
-		int params = method_call();
+	/*	if (symbol == nullptr || symbol->getType() != METHOD) {
+			throw new std::exception("Call to undeclared method " + name);
+		}
+		int params = method_call((MethodSymbol*)symbol);
 		std::string tmp = translator->get_temp_var();
 		translator->write(tmp);
 		translator->write("=");
@@ -635,27 +755,25 @@ void SyntaxAnalyzer::identifier_prefix_factors() {
 			translator->patch(translator->pop());
 		}
 		translator->write(")");
-		translator->newline();
-		translator->push(tmp);
-		*/
+		translator->push(tmp);*/
 	} else if (lookahead->getToken() == L_SUBSCRIPT_OPERATOR) {
 		match(L_SUBSCRIPT_OPERATOR);
 		expression();
 		match(R_SUBSCRIPT_OPERATOR);
 
-		std::string tmp = translator->get_temp_var();
+		std::string tmp = translator->get_temp_var(INT_VAR, curr_scope);
 
 		translator->write_instruction(
 			MOV_FROM_ARR,
-			symbolTable->getSymbol(tmp)->getOffset(),
-			symbolTable->getSymbol(id)->getOffset(),
-			symbolTable->getSymbol(translator->pop())->getOffset()
+			curr_scope->getSymbol(tmp)->getOffset() | LOCAL,
+			curr_scope->getSymbol(name)->getOffset() | scope,
+			curr_scope->getSymbol(translator->pop())->getOffset() | LOCAL
 		);
 		translator->next_instruction();
 		translator->push(tmp);
 
 	} else {
-		translator->push(id);
+		translator->push(std::to_string(symbol->getOffset()));
 	}
 }
 
@@ -685,4 +803,3 @@ void SyntaxAnalyzer::array_declaration() {
 	match(R_SUBSCRIPT_OPERATOR);
 	decrease_depth();
 }
-

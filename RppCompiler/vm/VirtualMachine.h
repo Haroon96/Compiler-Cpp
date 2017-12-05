@@ -16,6 +16,8 @@ public:
 private:
 
 	std::vector<int*> instruction_memory;
+	std::vector<int> stack;
 	int *ds;
+	int bp;
 
 };

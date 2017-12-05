@@ -11,12 +11,9 @@ int SymbolTable::addSymbol(Symbol *symbol) {
 	return symbolTable->size() - 1;
 }
 
-Symbol* SymbolTable::getSymbol(std::string id) {
-	return getSymbol(std::stoi(id));
-}
-
-Symbol* SymbolTable::getSymbol(int id) {
-	return (*symbolTable)[id];
+Symbol* SymbolTable::getSymbol(std::string name) {
+	int index = indexOf(name);
+	return index == -1 ? nullptr : (*symbolTable)[index];
 }
 
 int SymbolTable::indexOf(std::string name) {
@@ -48,4 +45,8 @@ int SymbolTable::getLength() {
 		length += (*symbolTable)[i]->getLength();
 	}
 	return length;
+}
+
+void SymbolTable::setMask(int mask) {
+	this->mask = mask;
 }

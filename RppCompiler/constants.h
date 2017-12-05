@@ -40,6 +40,13 @@ enum SymbolType {
 	CHAR_VAR
 };
 
+enum ParameterType {
+	INTEGER,
+	INTEGER_ARRAY,
+	CHARACTER,
+	CHARACTER_ARRAY
+};
+
 enum OpCode {
 	ADD,
 	SUB,
@@ -60,10 +67,16 @@ enum OpCode {
 	RET,
 	MOV_TO_ARR,
 	MOV_FROM_ARR,
-	ARR_IN,
 	LABEL,
 	CHAR_OUT,
+	CALL,
+	ALLOC,
 	UNUSED = -1
+};
+
+enum Scope {
+	GLOBAL = 0x1 << 31,
+	LOCAL = 0
 };
 
 std::string getTokenName(Token t);
