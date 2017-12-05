@@ -1,0 +1,14 @@
+INT_TYPE                      int
+IDENTIFIER                    i
+ASSIGNMENT_OPERATOR           =
+NUMERIC_CONSTANT              10
+DEF_STATEMENT                 def
+IDENTIFIER                    main
+L_PARENTHESES                 (
+R_PARENTHESES                 )
+L_BRACE                       {
+IDENTIFIER                    i
+ASSIGNMENT_OPERATOR           =
+NUMERIC_CONSTANT              10
+R_BRACE                       }
+

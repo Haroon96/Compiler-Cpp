@@ -1,0 +1,4 @@
+int i = 10
+def main() {
+	i = 10
+}
