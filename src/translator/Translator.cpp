@@ -109,7 +109,6 @@ std::string * Translator::getStream() {
 }
 
 void Translator::finalize(SymbolTable *globalSymbolTable) {
-	tac->insert(0, "\n");
 	tac->insert(0, std::to_string(globalSymbolTable->getLength()));
 
 	Symbol *main = globalSymbolTable->getSymbol("main");

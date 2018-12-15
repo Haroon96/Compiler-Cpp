@@ -106,14 +106,8 @@ void SyntaxAnalyzer::decrease_depth() {
 }
 
 std::string SyntaxAnalyzer::process_token_error(Token token) {
-	switch (token) {
-	case ELSE_STATEMENT:
-		return std::string("Dangling else statement");
-		break;
-	default:
-		return std::string("Unrecognized start of statement");
-		break;
-	}
+	// you can throw custom errors based on the token received here
+	return std::string("Unrecognized start of statement");
 }
 
 void SyntaxAnalyzer::start() {
