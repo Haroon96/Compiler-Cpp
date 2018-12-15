@@ -1,24 +1,24 @@
 CC = g++
 
-COMPILER_SRC = src/compiler.cpp src/lex/*.cpp src/syntax/*.cpp src/translator/*.cpp
-EXEC_SRC = src/exec.cpp src/vm/*.cpp
+COMPILER_SRC = src/compiler.cpp src/lex/*.cpp src/parser/*.cpp src/translator/*.cpp
+INTERPRETER_SRC = src/interpreter.cpp src/vm/*.cpp
 CONSTANTS_SRC = src/constants.cpp
 MODELS_SRC = src/models/*.cpp
 
 COMPILER_BIN = build/compile.exe
-EXEC_BIN = build/exec.exe
+INTERPRETER_BIN = build/interpret.exe
 
 
-build: build_compiler build_exec
+all: compiler interpreter
 
-build_compiler: create_build_dir $(SRC)
+compiler: create_build_dir
 	$(CC) $(COMPILER_SRC) $(CONSTANTS_SRC) $(MODELS_SRC) -o $(COMPILER_BIN) -std=c++11
 
-build_exec: create_build_dir $(COMPILER_SRC)
-	$(CC) $(EXEC_SRC) $(CONSTANTS_SRC) -o $(EXEC_BIN) -std=c++11
+interpreter: create_build_dir
+	$(CC) $(INTERPRETER_SRC) $(CONSTANTS_SRC) -o $(INTERPRETER_BIN) -std=c++11
 
 create_build_dir:
 	mkdir -p build
 
 clean:
-	rm -r build
+	rm -f $(COMPILER_BIN) $(INTERPRETER_BIN)

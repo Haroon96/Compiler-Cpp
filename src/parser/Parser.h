@@ -9,11 +9,11 @@ enum SymbolType;
 struct Symbol;
 struct MethodSymbol;
 
-class SyntaxAnalyzer {
+class Parser {
 
 public:
-	SyntaxAnalyzer(LexicalAnalyzer* lex, Translator *translator);
-	~SyntaxAnalyzer();
+	Parser(LexicalAnalyzer* lex, Translator *translator);
+	~Parser();
 	int getLineNumber();
 	void parse();
 	std::ostringstream* getStream();

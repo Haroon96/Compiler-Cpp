@@ -75,6 +75,7 @@ void Translator::reset_temp_index(int index) {
 
 void Translator::next_instruction() {
 	instruction_count++;
+	tac->append(" ");
 }
 
 std::string Translator::get_temp_var(SymbolType type, SymbolTable *curr_scope) {
@@ -109,6 +110,7 @@ std::string * Translator::getStream() {
 }
 
 void Translator::finalize(SymbolTable *globalSymbolTable) {
+	tac->insert(0, " ");
 	tac->insert(0, std::to_string(globalSymbolTable->getLength()));
 
 	Symbol *main = globalSymbolTable->getSymbol("main");

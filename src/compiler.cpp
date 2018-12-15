@@ -1,19 +1,19 @@
 #include <iostream>
 #include "lex\LexicalAnalyzer.h"
-#include "syntax\SyntaxAnalyzer.h"
+#include "parser\Parser.h"
 #include "translator\Translator.h"
 #include "constants.h"
 #include "models\SymbolTable.h"
 
 void print_help();
 bool parse_args(int argc, char *args[], std::ifstream &src, std::string &filename, bool &verbose_flag);
-void verbose_print(std::string src, std::string out, LexicalAnalyzer* lex, SyntaxAnalyzer* syntax);
+void verbose_print(std::string src, std::string out, LexicalAnalyzer* lex, Parser* parser);
 void print_friendly(std::ifstream in, std::ifstream out);
 
 int main(int argc, char *argv[]) {
 
 	LexicalAnalyzer *lex = nullptr;
-	SyntaxAnalyzer *syntax = nullptr;
+	Parser *parser = nullptr;
 	Translator *translator = nullptr;
 
 	std::ifstream src;
@@ -28,9 +28,9 @@ int main(int argc, char *argv[]) {
 	try {
 		lex = new LexicalAnalyzer(&src);
 		translator = new Translator();
-		syntax = new SyntaxAnalyzer(lex, translator);
+		parser = new Parser(lex, translator);
 
-		syntax->parse();
+		parser->parse();
 
 		std::string out = filename + std::string(".out");
 
@@ -42,12 +42,12 @@ int main(int argc, char *argv[]) {
 		src.close();
 
 		if (verbose) {
-			verbose_print(filename, out, lex, syntax);
+			verbose_print(filename, out, lex, parser);
 		}
 
 		delete lex;
 		delete translator;
-		delete syntax;
+		delete parser;
 
 	} catch (std::runtime_error &e) {
 		std::cerr << "Error encountered on line " << lex->getLineNumber() << std::endl;
@@ -75,7 +75,7 @@ void print_friendly(std::string in_file, std::string out_file) {
 	out.close();
 }
 
-void verbose_print(std::string src, std::string out, LexicalAnalyzer* lex, SyntaxAnalyzer* syntax) {
+void verbose_print(std::string src, std::string out, LexicalAnalyzer* lex, Parser* parser) {
 
 	std::string lex_out = src + std::string(".lex.txt");
 	std::string tree_out = src + std::string(".tree.txt");
@@ -84,7 +84,7 @@ void verbose_print(std::string src, std::string out, LexicalAnalyzer* lex, Synta
 	std::ofstream tree(tree_out);
 	std::ofstream tknlex(lex_out);
 
-	tree << syntax->getStream()->str() << std::endl;
+	tree << parser->getStream()->str() << std::endl;
 	tknlex << lex->getStream()->str() << std::endl;
 	print_friendly(out, friendly_code_out);
 

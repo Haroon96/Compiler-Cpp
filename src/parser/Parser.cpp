@@ -1,11 +1,11 @@
-﻿#include "SyntaxAnalyzer.h"
+﻿#include "Parser.h"
 #include "../constants.h"
 #include "../models/SymbolTable.h"
 #include "../models/Symbol.h"
 #include "../models/MethodSymbol.h"
 #include "../models/TokenLexeme.h"
 
-SyntaxAnalyzer::SyntaxAnalyzer(LexicalAnalyzer * lex, Translator * translator) {
+Parser::Parser(LexicalAnalyzer * lex, Translator * translator) {
 	this->lex = lex;
 	this->translator = translator;
 	this->lookahead = nullptr;
@@ -16,16 +16,16 @@ SyntaxAnalyzer::SyntaxAnalyzer(LexicalAnalyzer * lex, Translator * translator) {
 	this->curr_scope = global_scope;
 }
 
-SyntaxAnalyzer::~SyntaxAnalyzer() {
+Parser::~Parser() {
 	delete global_scope;
 }
 
-int SyntaxAnalyzer::getLineNumber() {
+int Parser::getLineNumber() {
 	return lex->getLineNumber();
 }
 
 // may throw exception
-void SyntaxAnalyzer::parse() {
+void Parser::parse() {
 
 	lookahead = lex->nextToken();
 
@@ -44,27 +44,27 @@ void SyntaxAnalyzer::parse() {
 	translator->finalize(global_scope);
 }
 
-std::ostringstream* SyntaxAnalyzer::getStream() {
+std::ostringstream* Parser::getStream() {
 	return stream;
 }
 
-void SyntaxAnalyzer::start_new_scope() {
+void Parser::start_new_scope() {
 	this->curr_scope = new SymbolTable();
 }
 
-void SyntaxAnalyzer::end_of_scope() {
+void Parser::end_of_scope() {
 	delete curr_scope;
 	curr_scope = global_scope;
 }
 
-void SyntaxAnalyzer::pad(std::string name) {
+void Parser::pad(std::string name) {
 	for (int i = 0; i < depth; ++i) {
 		*stream << "|-- ";
 	}
 	*stream << name << std::endl;
 }
 
-bool SyntaxAnalyzer::match(Token token) {
+bool Parser::match(Token token) {
 	if (lookahead->getToken() != token) {
 		throw std::runtime_error(std::string("Expected " + getTokenName(token) + " but encountered " + getTokenName(lookahead->getToken()) + " instead").c_str());
 	}
@@ -82,7 +82,7 @@ bool SyntaxAnalyzer::match(Token token) {
 	return true;
 }
 
-Symbol *SyntaxAnalyzer::locateSymbol(std::string lexeme) {
+Symbol *Parser::locateSymbol(std::string lexeme) {
 	// if global scope or symbol not found locally, look in global scope
 	Symbol *symbol = nullptr;
 	if (curr_scope == nullptr || (symbol = curr_scope->getSymbol(lexeme)) == nullptr) {
@@ -91,26 +91,26 @@ Symbol *SyntaxAnalyzer::locateSymbol(std::string lexeme) {
 	return symbol;
 }
 
-MethodSymbol* SyntaxAnalyzer::locateMethod(std::string lexeme) {
+MethodSymbol* Parser::locateMethod(std::string lexeme) {
 	MethodSymbol *method;
 	method = (MethodSymbol*)global_scope->getSymbol(lexeme);
 	return (method == nullptr || method->getType() != METHOD) ? nullptr : method;
 }
 
-void SyntaxAnalyzer::increase_depth() {
+void Parser::increase_depth() {
 	depth++;
 }
 
-void SyntaxAnalyzer::decrease_depth() {
+void Parser::decrease_depth() {
 	depth--;
 }
 
-std::string SyntaxAnalyzer::process_token_error(Token token) {
+std::string Parser::process_token_error(Token token) {
 	// you can throw custom errors based on the token received here
 	return std::string("Unrecognized start of statement");
 }
 
-void SyntaxAnalyzer::start() {
+void Parser::start() {
 	increase_depth();
 	if (lookahead->getToken() == DEF_STATEMENT) {
 		pad("Function declaration");
@@ -126,7 +126,7 @@ void SyntaxAnalyzer::start() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::function_declaration() {
+void Parser::function_declaration() {
 	increase_depth();
 	match(DEF_STATEMENT);
 
@@ -170,7 +170,7 @@ void SyntaxAnalyzer::function_declaration() {
 	decrease_depth();
 }
 
-int SyntaxAnalyzer::parameters(MethodSymbol *method) {
+int Parser::parameters(MethodSymbol *method) {
 
 	if (lookahead->getToken() == R_PARENTHESES) {
 		return -2;
@@ -218,14 +218,14 @@ int SyntaxAnalyzer::parameters(MethodSymbol *method) {
 	return offset;
 }
 
-void SyntaxAnalyzer::variable_declaration() {
+void Parser::variable_declaration() {
 	increase_depth(); 
 	SymbolType symbolType = data_type();
 	variable_declaration_list(symbolType);
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::variable_declaration_list(SymbolType type) {
+void Parser::variable_declaration_list(SymbolType type) {
 
 	std::string lexeme = lookahead->getLexeme();
 
@@ -252,14 +252,14 @@ void SyntaxAnalyzer::variable_declaration_list(SymbolType type) {
 
 }
 
-void SyntaxAnalyzer::global_variable_declaration() {
+void Parser::global_variable_declaration() {
 	increase_depth();
 	SymbolType symbolType = data_type();
 	global_variable_declaration_list(symbolType);
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::global_variable_declaration_list(SymbolType type) {
+void Parser::global_variable_declaration_list(SymbolType type) {
 
 	std::string lexeme = lookahead->getLexeme();
 
@@ -293,14 +293,14 @@ void SyntaxAnalyzer::global_variable_declaration_list(SymbolType type) {
 	}
 }
 
-void SyntaxAnalyzer::variable_initialization() {
+void Parser::variable_initialization() {
 	pad("Variable initialization");
 	increase_depth();
 	assignment();
 	decrease_depth();
 }
 
-SymbolType SyntaxAnalyzer::data_type() {
+SymbolType Parser::data_type() {
 	if (lookahead->getToken() == INT_TYPE) {
 		match(INT_TYPE);
 		return INT_VAR;
@@ -312,7 +312,7 @@ SymbolType SyntaxAnalyzer::data_type() {
 	}
 }
 
-void SyntaxAnalyzer::statements(int reset_point) {
+void Parser::statements(int reset_point) {
 	pad("Statement list");
 	increase_depth();
 	while (lookahead->getToken() != R_BRACE && lookahead->getToken() != RETURN_STATEMENT) {
@@ -322,7 +322,7 @@ void SyntaxAnalyzer::statements(int reset_point) {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::statement() {
+void Parser::statement() {
 	pad("Statement");
 	increase_depth();
 	switch (lookahead->getToken()) {
@@ -353,7 +353,7 @@ void SyntaxAnalyzer::statement() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::print_statement() {
+void Parser::print_statement() {
 	pad("Print statement");
 	increase_depth();
 	match(PRINT_STATEMENT);
@@ -367,7 +367,7 @@ void SyntaxAnalyzer::print_statement() {
 	translator->next_instruction();
 	decrease_depth();
 }
-void SyntaxAnalyzer::get_statement() {
+void Parser::get_statement() {
 	pad("Get statement");
 	increase_depth();
 	match(GET_STATEMENT);
@@ -397,7 +397,7 @@ void SyntaxAnalyzer::get_statement() {
 	translator->next_instruction();
 	decrease_depth();
 }
-void SyntaxAnalyzer::if_statement() {
+void Parser::if_statement() {
 	pad("IF statement");
 	increase_depth();
 	match(IF_STATEMENT);
@@ -455,7 +455,7 @@ void SyntaxAnalyzer::if_statement() {
 	}
 	translator->patch(end);
 }
-void SyntaxAnalyzer::else_statement() {
+void Parser::else_statement() {
 	pad("ELSE statement");
 	increase_depth();
 	translator->write(GOTO);
@@ -474,7 +474,7 @@ void SyntaxAnalyzer::else_statement() {
 	translator->patch(translator->get_instruction_count());
 	decrease_depth();
 }
-void SyntaxAnalyzer::while_statement() {
+void Parser::while_statement() {
 	pad("WHILE statement");
 	increase_depth();
 	match(WHILE_STATEMENT);
@@ -529,7 +529,7 @@ void SyntaxAnalyzer::while_statement() {
 	translator->patch(translator->get_instruction_count());
 	decrease_depth();
 }
-void SyntaxAnalyzer::return_statement() {
+void Parser::return_statement() {
 	pad("Return statement");
 	increase_depth();
 	if (lookahead->getToken() == RETURN_STATEMENT) {
@@ -542,7 +542,7 @@ void SyntaxAnalyzer::return_statement() {
 	translator->next_instruction();
 	decrease_depth();
 }
-void SyntaxAnalyzer::identifier_prefix_statements() {
+void Parser::identifier_prefix_statements() {
 	std::string name = lookahead->getLexeme();
 	match(IDENTIFIER);
 	if (lookahead->getToken() == L_PARENTHESES) {
@@ -583,7 +583,7 @@ void SyntaxAnalyzer::identifier_prefix_statements() {
 		translator->next_instruction();
 	}
 }
-void SyntaxAnalyzer::method_call(MethodSymbol *method) {
+void Parser::method_call(MethodSymbol *method) {
 	pad("Function call");
 	increase_depth();
 	pad("Function parameter list");
@@ -616,14 +616,14 @@ void SyntaxAnalyzer::method_call(MethodSymbol *method) {
 	decrease_depth();
 	decrease_depth();
 }
-void SyntaxAnalyzer::assignment() {
+void Parser::assignment() {
 	pad("Assignment");
 	increase_depth();
 	match(ASSIGNMENT_OPERATOR);
 	expression();
 	decrease_depth();
 }
-void SyntaxAnalyzer::expression() {
+void Parser::expression() {
 	pad("Expression");
 	increase_depth();
 	term();
@@ -631,7 +631,7 @@ void SyntaxAnalyzer::expression() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::expression_p() {
+void Parser::expression_p() {
 	pad("Expression'");
 	increase_depth();
 	if (lookahead->getToken() == ADDITION_OPERATOR || lookahead->getToken() == SUBTRACTION_OPERATOR) {
@@ -666,7 +666,7 @@ void SyntaxAnalyzer::expression_p() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::term() {
+void Parser::term() {
 	pad("Term");
 	increase_depth();
 	factor();
@@ -674,7 +674,7 @@ void SyntaxAnalyzer::term() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::term_p() {
+void Parser::term_p() {
 	pad("Term'");
 	increase_depth();
 	if (lookahead->getToken() == MULTIPLICATION_OPERATOR || lookahead->getToken() == DIVISION_OPERATOR) {
@@ -708,7 +708,7 @@ void SyntaxAnalyzer::term_p() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::factor() {
+void Parser::factor() {
 	pad("Factor");
 	increase_depth();
 	if (lookahead->getToken() == IDENTIFIER) {
@@ -736,7 +736,7 @@ void SyntaxAnalyzer::factor() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::identifier_prefix_factors() {
+void Parser::identifier_prefix_factors() {
 	std::string name = lookahead->getLexeme();
 	Symbol *symbol = locateSymbol(name);
 	match(IDENTIFIER);
@@ -780,7 +780,7 @@ void SyntaxAnalyzer::identifier_prefix_factors() {
 	}
 }
 
-void SyntaxAnalyzer::boolean_expression() {
+void Parser::boolean_expression() {
 	pad("Boolean expression");
 	increase_depth();
 	expression();
@@ -789,7 +789,7 @@ void SyntaxAnalyzer::boolean_expression() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::relational_operator() {
+void Parser::relational_operator() {
 	pad("Relational operator");
 	increase_depth();
 	translator->push(lookahead->getLexeme());
@@ -797,7 +797,7 @@ void SyntaxAnalyzer::relational_operator() {
 	decrease_depth();
 }
 
-void SyntaxAnalyzer::array_declaration() {
+void Parser::array_declaration() {
 	pad("Array declaration");
 	increase_depth();
 	match(L_SUBSCRIPT_OPERATOR);
