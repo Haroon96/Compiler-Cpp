@@ -1,7 +1,7 @@
 #include "Translator.h"
 #include "../constants.h"
-#include "../Symbol.h"
-#include "../SymbolTable.h"
+#include "../models/Symbol.h"
+#include "../models/SymbolTable.h"
 #include <sstream>
 #include <string>
 
@@ -75,7 +75,6 @@ void Translator::reset_temp_index(int index) {
 
 void Translator::next_instruction() {
 	instruction_count++;
-	tac->append("\n");
 }
 
 std::string Translator::get_temp_var(SymbolType type, SymbolTable *curr_scope) {

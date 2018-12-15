@@ -2,8 +2,10 @@
 #include "automata.h"
 #include "util.h"
 #include "../constants.h"
-#include "../TokenLexeme.h"
+#include "../models/TokenLexeme.h"
 #include <sstream>
+#include <cstring>
+#include <string>
 
 const char *LexicalAnalyzer::padding = "                              ";
 
@@ -100,7 +102,8 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 			// rest of the line is commented out so skip it
 			if (feed && symbol == '#') {
 				feed = false;
-				std::getline(*file, std::string());
+				std::string dump;
+				std::getline(*file, dump);
 				token = IGNORE;
 			}
 

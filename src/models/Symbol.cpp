@@ -1,5 +1,5 @@
 #include "Symbol.h"
-#include "constants.h"
+#include "../constants.h"
 
 Symbol::Symbol(std::string name) {
 	this->name = name;

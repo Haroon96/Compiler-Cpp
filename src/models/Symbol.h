@@ -1,8 +1,7 @@
 #pragma once
 
+#include "../constants.h"
 #include <string>
-
-enum SymbolType;
 
 struct Symbol {
 public:

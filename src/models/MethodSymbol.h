@@ -1,7 +1,8 @@
 #pragma once
 
+#include <vector>
 #include "Symbol.h"
-#include "constants.h"
+#include "../constants.h"
 
 struct MethodSymbol : Symbol {
 public:

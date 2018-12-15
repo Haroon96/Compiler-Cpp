@@ -1,6 +1,6 @@
 #pragma once
 
-enum Token;
+#include "../constants.h"
 
 namespace automata {
 	Token numeric_constants(char symbol, int& state);

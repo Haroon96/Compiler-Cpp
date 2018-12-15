@@ -1,9 +1,9 @@
 ﻿#include "SyntaxAnalyzer.h"
 #include "../constants.h"
-#include "../SymbolTable.h"
-#include "../Symbol.h"
-#include "../MethodSymbol.h"
-#include "../TokenLexeme.h"
+#include "../models/SymbolTable.h"
+#include "../models/Symbol.h"
+#include "../models/MethodSymbol.h"
+#include "../models/TokenLexeme.h"
 
 SyntaxAnalyzer::SyntaxAnalyzer(LexicalAnalyzer * lex, Translator * translator) {
 	this->lex = lex;
@@ -30,7 +30,7 @@ void SyntaxAnalyzer::parse() {
 	lookahead = lex->nextToken();
 
 	if (lookahead == nullptr) {
-		throw std::exception("An error occured while parsing the file. No tokens found.");
+		throw std::runtime_error("An error occured while parsing the file. No tokens found.");
 	}
 	pad("Global declaration list");
 	while (lex->hasNextToken()) {
@@ -39,7 +39,7 @@ void SyntaxAnalyzer::parse() {
 
 	Symbol *symbol = global_scope->getSymbol("main");
 	if (symbol == nullptr) {
-		throw std::exception("No main method found");
+		throw std::runtime_error("No main method found");
 	}
 	translator->finalize(global_scope);
 }
@@ -66,12 +66,12 @@ void SyntaxAnalyzer::pad(std::string name) {
 
 bool SyntaxAnalyzer::match(Token token) {
 	if (lookahead->getToken() != token) {
-		throw std::exception(std::string("Expected " + getTokenName(token) + " but encountered " + getTokenName(lookahead->getToken()) + " instead").c_str());
+		throw std::runtime_error(std::string("Expected " + getTokenName(token) + " but encountered " + getTokenName(lookahead->getToken()) + " instead").c_str());
 	}
 	if (token == IDENTIFIER) {
 		Symbol* symbol = locateSymbol(lookahead->getLexeme());
 		if (symbol == nullptr) {
-			throw std::exception(std::string("Undeclared identifier " + lookahead->getLexeme()).c_str());
+			throw std::runtime_error(std::string("Undeclared identifier " + lookahead->getLexeme()).c_str());
 		}
 	}
 	pad(lookahead->getLexeme());
@@ -105,13 +105,13 @@ void SyntaxAnalyzer::decrease_depth() {
 	depth--;
 }
 
-char * SyntaxAnalyzer::process_token_error(Token token) {
+std::string SyntaxAnalyzer::process_token_error(Token token) {
 	switch (token) {
 	case ELSE_STATEMENT:
-		return "Dangling else statement";
+		return std::string("Dangling else statement");
 		break;
 	default:
-		return "Unrecognized start of statement";
+		return std::string("Unrecognized start of statement");
 		break;
 	}
 }
@@ -127,7 +127,7 @@ void SyntaxAnalyzer::start() {
 		pad("Variable declaration");
 		global_variable_declaration();
 	} else {
-		throw std::exception("Expected variable or function declaration");
+		throw std::runtime_error("Expected variable or function declaration");
 	}
 	decrease_depth();
 }
@@ -314,7 +314,7 @@ SymbolType SyntaxAnalyzer::data_type() {
 		match(CHAR_TYPE);
 		return CHAR_VAR;
 	} else {
-		throw std::exception("Invalid data type");
+		throw std::runtime_error("Invalid data type");
 	}
 }
 
@@ -353,7 +353,7 @@ void SyntaxAnalyzer::statement() {
 		identifier_prefix_statements();
 		break;
 	default:
-		throw std::exception(process_token_error(lookahead->getToken()));
+		throw std::runtime_error(process_token_error(lookahead->getToken()));
 		break;
 	}
 	decrease_depth();
@@ -554,7 +554,7 @@ void SyntaxAnalyzer::identifier_prefix_statements() {
 	if (lookahead->getToken() == L_PARENTHESES) {
 		MethodSymbol *symbol = locateMethod(name);
 		if (symbol == nullptr) {
-			throw std::exception("Call to undeclared procedure");
+			throw std::runtime_error("Call to undeclared procedure");
 		}
 		method_call(symbol);
 		translator->write_instruction(CALL, symbol->getOffset());
@@ -616,8 +616,8 @@ void SyntaxAnalyzer::method_call(MethodSymbol *method) {
 			}
 		}
 		match(R_PARENTHESES);
-	} catch (std::exception e) {
-		throw std::exception(std::string("Invalid parameter list for method " + method->getName()).c_str());
+	} catch (std::runtime_error e) {
+		throw std::runtime_error(std::string("Invalid parameter list for method " + method->getName()).c_str());
 	}
 	decrease_depth();
 	decrease_depth();
@@ -737,7 +737,7 @@ void SyntaxAnalyzer::factor() {
 		translator->push(lookahead->getLexeme());
 		match(LITERAL_CONSTANT);
 	} else {
-		throw std::exception("Invalid expression");
+		throw std::runtime_error("Invalid expression");
 	}
 	decrease_depth();
 }
@@ -749,7 +749,7 @@ void SyntaxAnalyzer::identifier_prefix_factors() {
 	if (lookahead->getToken() == L_PARENTHESES) {
 		MethodSymbol *symbol = locateMethod(name);
 		if (symbol == nullptr) {
-			throw std::exception("Call to undeclared procedure");
+			throw std::runtime_error("Call to undeclared procedure");
 		}
 		method_call(symbol);
 		std::string tmp = translator->get_temp_var(INT_VAR, curr_scope);

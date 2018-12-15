@@ -42,3 +42,36 @@ std::string getSymbolType(SymbolType t) {
 	};
 	return symbol_types[t];
 }
+
+std::string getReadableOpCode(int i) {
+	std::string OpCodeReadable[] = {
+		"ADD",
+		"SUB",
+		"MUL",
+		"DIV",
+		"MOV",
+		"OUT",
+		"IN",
+		"IF_GE_GOTO",
+		"IF_LE_GOTO",
+		"IF_L_GOTO",
+		"IF_G_GOTO",
+		"IF_E_GOTO",
+		"IF_NE_GOTO",
+		"GOTO",
+		"PARAM",
+		"SET",
+		"RET",
+		"MOV_TO_ARR",
+		"MOV_FROM_ARR",
+		"LABEL",
+		"CHAR_OUT",
+		"CALL",
+		"ALLOC",
+		"UNUSED",
+		"CALL_CLEANUP",
+		"CALL_CLEANUP_NO_RESULT",
+		"EXIT"
+	};
+	return OpCodeReadable[i];
+}

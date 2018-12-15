@@ -1,6 +1,6 @@
 #include "SymbolTable.h"
 #include "Symbol.h"
-#include "constants.h"
+#include "../constants.h"
 
 SymbolTable::SymbolTable() {
 	mask = 0;

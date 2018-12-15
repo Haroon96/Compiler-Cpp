@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <string>
 
 enum Token {
@@ -80,3 +79,4 @@ enum Scope {
 
 std::string getTokenName(Token t);
 std::string getSymbolType(SymbolType t);
+std::string getReadableOpCode(int);
