@@ -52,6 +52,7 @@ A makefile is included in the repo that was tested for `make` on Windows (using 
 ```
   compile [-v] filename
     Generates an object code file for the source in `filename`.
+    Using -v turns verbosity on and writes intermediate states to respective files.
 ```
 ```
   interpret filename
