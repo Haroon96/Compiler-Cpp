@@ -33,7 +33,7 @@ def foo(int i) {          # functions are declared using the def keyword
 def main() {              # main method must exist
     int i                 # you can initialize a variable too!
     gets i                # input from user
-    print foo(i)          # call foo with parameter i and print the result
+    print foo(i) * 10     # call foo with parameter i, multiply it by 10, and print the result
 }
 
 ```
