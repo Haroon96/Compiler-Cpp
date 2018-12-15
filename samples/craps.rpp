@@ -1,0 +1,15 @@
+def main() {
+	int ans = 10
+	int predict = 0
+	
+	while predict != ans {
+		get predict
+		if predict < ans
+			print 'l'
+		else if predict > ans
+			print 'h'
+		else
+			print 'e'
+	}
+	
+}
