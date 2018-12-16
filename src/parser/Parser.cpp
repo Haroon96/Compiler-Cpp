@@ -71,7 +71,7 @@ bool Parser::match(Token token) {
 	if (token == IDENTIFIER) {
 		Symbol* symbol = locateSymbol(lookahead->getLexeme());
 		if (symbol == nullptr) {
-			throw std::runtime_error(std::string("Undeclared identifier " + lookahead->getLexeme()).c_str());
+			throw std::runtime_error(std::string("Undeclared identifier '" + lookahead->getLexeme() + "'").c_str());
 		}
 	}
 	pad(lookahead->getLexeme());
