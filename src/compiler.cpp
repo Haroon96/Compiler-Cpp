@@ -1,5 +1,5 @@
 #include <iostream>
-#include "lex\LexicalAnalyzer.h"
+#include "lex\Tokenizer.h"
 #include "parser\Parser.h"
 #include "translator\Translator.h"
 #include "constants.h"
@@ -7,12 +7,12 @@
 
 void print_help();
 bool parse_args(int argc, char *args[], std::ifstream &src, std::string &filename, bool &verbose_flag);
-void verbose_print(std::string src, std::string out, LexicalAnalyzer* lex, Parser* parser);
+void verbose_print(std::string src, std::string out, Tokenizer* lex, Parser* parser);
 void print_friendly(std::ifstream in, std::ifstream out);
 
 int main(int argc, char *argv[]) {
 
-	LexicalAnalyzer *lex = nullptr;
+	Tokenizer *lex = nullptr;
 	Parser *parser = nullptr;
 	Translator *translator = nullptr;
 
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	try {
-		lex = new LexicalAnalyzer(&src);
+		lex = new Tokenizer(&src);
 		translator = new Translator();
 		parser = new Parser(lex, translator);
 
@@ -75,7 +75,7 @@ void print_friendly(std::string in_file, std::string out_file) {
 	out.close();
 }
 
-void verbose_print(std::string src, std::string out, LexicalAnalyzer* lex, Parser* parser) {
+void verbose_print(std::string src, std::string out, Tokenizer* lex, Parser* parser) {
 
 	std::string lex_out = src + std::string(".lex.txt");
 	std::string tree_out = src + std::string(".tree.txt");

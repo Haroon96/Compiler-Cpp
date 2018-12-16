@@ -1,4 +1,4 @@
-#include "LexicalAnalyzer.h"
+#include "Tokenizer.h"
 #include "automata.h"
 #include "util.h"
 #include "../constants.h"
@@ -7,15 +7,15 @@
 #include <cstring>
 #include <string>
 
-const char *LexicalAnalyzer::padding = "                              ";
+const char *Tokenizer::padding = "                              ";
 
-LexicalAnalyzer::LexicalAnalyzer(std::ifstream * file) {
+Tokenizer::Tokenizer(std::ifstream * file) {
 	this->file = file;
 	this->line_no = 1;
 	this->tlStream = new std::ostringstream();
 }
 
-TokenLexeme* LexicalAnalyzer::nextToken() {
+TokenLexeme* Tokenizer::nextToken() {
 
 	// pointers to automaton methods
 	// sorted by descending priority
@@ -105,6 +105,7 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 				std::string dump;
 				std::getline(*file, dump);
 				token = IGNORE;
+				line_no++;
 			}
 
 		}
@@ -130,13 +131,13 @@ TokenLexeme* LexicalAnalyzer::nextToken() {
 	return tokenLexeme;
 }
 
-bool LexicalAnalyzer::hasNextToken() {
+bool Tokenizer::hasNextToken() {
 	return file->peek() != EOF;
 }
-std::ostringstream * LexicalAnalyzer::getStream() {
+std::ostringstream * Tokenizer::getStream() {
 	return tlStream;
 }
 
-int LexicalAnalyzer::getLineNumber() {
+int Tokenizer::getLineNumber() {
 	return line_no;
 }

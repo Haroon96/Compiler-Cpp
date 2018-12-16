@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lex/LexicalAnalyzer.h"
+#include "../lex/Tokenizer.h"
 #include "../translator/Translator.h"
 #include <sstream>
 
@@ -12,7 +12,7 @@ struct MethodSymbol;
 class Parser {
 
 public:
-	Parser(LexicalAnalyzer* lex, Translator *translator);
+	Parser(Tokenizer* lex, Translator *translator);
 	~Parser();
 	int getLineNumber();
 	void parse();
@@ -20,7 +20,7 @@ public:
 
 private:
 
-	LexicalAnalyzer* lex;
+	Tokenizer* lex;
 	Translator* translator;
 	SymbolTable *curr_scope;
 	SymbolTable *global_scope;

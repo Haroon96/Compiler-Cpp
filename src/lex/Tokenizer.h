@@ -6,10 +6,10 @@
 
 struct TokenLexeme;
 
-class LexicalAnalyzer {
+class Tokenizer {
 public:
 
-	LexicalAnalyzer(std::ifstream *file);
+	Tokenizer(std::ifstream *file);
 
 	TokenLexeme* nextToken();
 	bool hasNextToken();

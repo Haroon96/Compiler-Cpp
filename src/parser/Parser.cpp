@@ -5,7 +5,7 @@
 #include "../models/MethodSymbol.h"
 #include "../models/TokenLexeme.h"
 
-Parser::Parser(LexicalAnalyzer * lex, Translator * translator) {
+Parser::Parser(Tokenizer * lex, Translator * translator) {
 	this->lex = lex;
 	this->translator = translator;
 	this->lookahead = nullptr;
