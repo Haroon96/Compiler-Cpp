@@ -16,7 +16,7 @@ Of course, this isn't a fully featured compiler and lacks support for other, mor
 * Arrays can not be passed to functions
 
 ## Language Syntax
-The `samples` folder contains some sample programs that demonstrate the syntax for the language. The following snippet should, however, provide a base outline.
+The `samples` folder contains some sample programs that demonstrate the syntax for the language. The following snippet should provide a basic overview.
 
 ```
 # Comments can be written by a leading #
